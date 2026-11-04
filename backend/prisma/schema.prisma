@@ -1,0 +1,122 @@
+// Esquema inicial de la base de datos del consultorio.
+// Etapa 1: define el modelo de datos. Las migraciones se ejecutarán en la etapa 2,
+// cuando se configure PostgreSQL local y, luego, Neon.
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Roles de acceso al sistema.
+enum Rol {
+  MEDICO
+  SECRETARIA
+}
+
+// Estados del turno dentro del flujo de atención.
+enum EstadoTurno {
+  PROGRAMADO
+  LLEGO          // El paciente llegó y está en sala de espera
+  EN_ATENCION    // Con el médico
+  ATENDIDO
+  AUSENTE
+  CANCELADO
+}
+
+// Estado de vigencia del aviso/noticia del sitio público.
+enum EstadoAviso {
+  VIGENTE
+  VENCIDO
+}
+
+// Usuario del sistema (médico o secretaria). Autenticación: pendiente (etapa 2).
+model Usuario {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  contrasenaHash String
+  nombre         String
+  rol            Rol
+  activo         Boolean  @default(true)
+  creadoEn       DateTime @default(now())
+  actualizadoEn  DateTime @updatedAt
+
+  @@map("usuarios")
+}
+
+// Paciente del consultorio.
+model Paciente {
+  id            String   @id @default(cuid())
+  nombre        String
+  apellido      String
+  dni           String   @unique
+  fechaNacimiento DateTime?
+  telefono      String?
+  email         String?
+  obraSocial    String?
+  notas         String?
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  turnos        Turno[]
+
+  @@map("pacientes")
+}
+
+// Turno de consulta.
+model Turno {
+  id            String      @id @default(cuid())
+  pacienteId    String
+  fechaHora     DateTime
+  duracionMin   Int         @default(30)
+  motivo        String?
+  estado        EstadoTurno @default(PROGRAMADO)
+  horaLlegada   DateTime?
+  notas         String?
+  creadoEn      DateTime    @default(now())
+  actualizadoEn DateTime    @updatedAt
+
+  paciente      Paciente    @relation(fields: [pacienteId], references: [id])
+
+  @@index([fechaHora])
+  @@index([pacienteId])
+  @@map("turnos")
+}
+
+// Historia clínica (etapa futura: estructura detallada de consultas, epicrisis, estudios).
+model HistoriaClinica {
+  id            String   @id @default(cuid())
+  pacienteId    String   @unique
+  observaciones String?
+  creadoEn      DateTime @default(now())
+  actualizadoEn DateTime @updatedAt
+
+  @@map("historias_clinicas")
+}
+
+// Avisos visibles en la página pública (vacaciones, cambio de horario, novedades).
+model Aviso {
+  id          String      @id @default(cuid())
+  titulo      String
+  mensaje     String
+  desde       DateTime
+  hasta       DateTime
+  estado      EstadoAviso @default(VIGENTE)
+  creadoEn    DateTime    @default(now())
+
+  @@map("avisos")
+}
+
+// Datos editables del sitio público (perfil del médico, servicios, FAQ, contacto).
+// Etapa futura: CRUD desde el panel.
+model ContenidoSitio {
+  id      String @id @default(cuid())
+  clave   String @unique // p.ej. "perfil", "horarios", "obras-sociales", "faq"
+  valor   Json
+
+  @@map("contenido_sitio")
+}
