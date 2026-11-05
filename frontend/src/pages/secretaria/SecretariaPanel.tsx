@@ -1,179 +1,401 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useAuth } from '@/lib/auth'
 import { Link } from 'react-router-dom'
 import {
-  CalendarClock,
+  CalendarDays,
+  CalendarPlus,
+  CheckCircle2,
   ClipboardList,
-  DoorOpen,
+  Clock3,
+  Loader2,
+  RefreshCw,
   Search,
   UserPlus,
   Users,
-  UsersRound,
+  BarChart3,
+  Filter,
 } from 'lucide-react'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { StatCard } from '@/components/dashboard/StatCard'
-import { AgendaDelDia, horaDe, nombreCompleto } from '@/components/dashboard/Listas'
-import { pacientesDemo, turnosDemo } from '@/data/mock'
-import type { Paciente } from '@/types/domain'
+import { Card } from '@/components/ui/Card'
+import { ListaInscripciones } from '@/components/inscripciones/ListaInscripciones'
+import { HistorialAtendidosPorJornada } from '@/components/inscripciones/HistorialAtendidosPorJornada'
+import { InscripcionModal } from '@/components/inscripciones/InscripcionModal'
+import { ModalCancelacion } from '@/components/inscripciones/ModalCancelacion'
+import { getInscripciones, getPacientes, type PacienteApi, type TurnoApi } from '@/lib/api'
+
+type FiltroJornada = 'TODOS' | 'EN_ESPERA' | 'EN_ATENCION' | 'ATENDIDO' | 'CANCELADO'
+
+function hoyLocal(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function fechaLinda(fecha: string): string {
+  return new Date(`${fecha}T12:00:00`).toLocaleDateString('es-AR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
 
 export default function SecretariaPanel() {
-  const consultas = turnosDemo.filter((t) => t.estado === 'PROGRAMADO')
-  const llegaron = turnosDemo.filter((t) => t.estado === 'LLEGO' || t.estado === 'EN_ATENCION')
-  const esperan = turnosDemo.filter((t) => t.estado === 'LLEGO')
-  const atendidos = turnosDemo.filter((t) => t.estado === 'ATENDIDO')
+  const { usuario } = useAuth()
+  const [fecha, setFecha] = useState(hoyLocal)
+  const [turnos, setTurnos] = useState<TurnoApi[]>([])
+  const [cargando, setCargando] = useState(true)
+  const [refresco, setRefresco] = useState(0)
+  const [error, setError] = useState<string | null>(null)
+  const [aviso, setAviso] = useState<string | null>(null)
+  const [verCancelados, setVerCancelados] = useState(false)
+  const [modalInscripcion, setModalInscripcion] = useState(false)
+  const [turnoACancelar, setTurnoACancelar] = useState<TurnoApi | null>(null)
+  const [busquedaPaciente, setBusquedaPaciente] = useState('')
+  const [resultadosPaciente, setResultadosPaciente] = useState<PacienteApi[]>([])
+  const [buscandoPaciente, setBuscandoPaciente] = useState(false)
+  const [errorBusquedaPaciente, setErrorBusquedaPaciente] = useState<string | null>(null)
+  const [busquedaJornada, setBusquedaJornada] = useState('')
+  const [filtroJornada, setFiltroJornada] = useState<FiltroJornada>('TODOS')
 
-  const [q, setQ] = useState('')
-  const resultados = useMemo(() => {
-    const term = q.trim().toLowerCase()
-    if (!term) return []
-    return pacientesDemo.filter((p: Paciente) =>
-      `${p.nombre} ${p.apellido} ${p.dni}`.toLowerCase().includes(term),
+  useEffect(() => {
+    let cancelado = false
+    setCargando(true)
+    setError(null)
+    setTurnos([])
+    getInscripciones({ fecha, incluirCancelados: true })
+      .then(({ items }) => {
+        if (!cancelado) setTurnos(items)
+      })
+      .catch(() => {
+        if (!cancelado) setError('No se pudieron cargar las inscripciones del día.')
+      })
+      .finally(() => {
+        if (!cancelado) setCargando(false)
+      })
+    return () => {
+      cancelado = true
+    }
+  }, [fecha, refresco])
+
+  useEffect(() => {
+    let cancelado = false
+    const termino = busquedaPaciente.trim()
+    if (termino.length < 2) {
+      setResultadosPaciente([])
+      setBuscandoPaciente(false)
+      setErrorBusquedaPaciente(null)
+      return
+    }
+    setErrorBusquedaPaciente(null)
+    setBuscandoPaciente(true)
+    const timer = window.setTimeout(() => {
+      getPacientes(termino, 1, 5)
+        .then((data) => {
+          if (!cancelado) setResultadosPaciente(data.items)
+        })
+        .catch(() => {
+          if (!cancelado) {
+            setResultadosPaciente([])
+            setErrorBusquedaPaciente('No se pudo completar la búsqueda. Intentá nuevamente.')
+          }
+        })
+        .finally(() => {
+          if (!cancelado) setBuscandoPaciente(false)
+        })
+    }, 250)
+    return () => {
+      cancelado = true
+      window.clearTimeout(timer)
+    }
+  }, [busquedaPaciente])
+
+  const activos = useMemo(() => turnos.filter((t) => t.estado !== 'CANCELADO'), [turnos])
+  const cancelados = useMemo(() => turnos.filter((t) => t.estado === 'CANCELADO'), [turnos])
+  const enEspera = activos.filter((t) => t.estado === 'EN_ESPERA')
+  const enAtencion = activos.filter((t) => t.estado === 'EN_ATENCION')
+  const atendidos = activos.filter((t) => t.estado === 'ATENDIDO')
+  const terminoJornada = busquedaJornada.trim().toLocaleLowerCase('es-AR')
+  const porTexto = turnos.filter((t) => {
+    const coincideTexto = !terminoJornada || `${t.paciente.nombre} ${t.paciente.apellido} ${t.paciente.dni}`.toLocaleLowerCase('es-AR').includes(terminoJornada)
+    const coincideEstado = filtroJornada === 'TODOS' || t.estado === filtroJornada
+    return coincideTexto && coincideEstado
+  })
+  const mostrandoCancelados = verCancelados || filtroJornada === 'CANCELADO'
+  const visibles = mostrandoCancelados ? porTexto.filter((t) => t.estado === 'CANCELADO') : porTexto.filter((t) => t.estado !== 'CANCELADO')
+
+  function mostrarAviso(mensaje: string) {
+    setAviso(mensaje)
+    window.setTimeout(() => setAviso(null), 5000)
+  }
+
+  function alInscribir(turno: TurnoApi) {
+    setRefresco((valor) => valor + 1)
+    mostrarAviso(
+      `Paciente inscripto con el número ${turno.numeroOrdenDia ?? '—'}. Quedó en espera.`,
     )
-  }, [q])
+  }
 
-  const agendaHoy = [...turnosDemo].sort((a, b) => a.fechaHora.localeCompare(b.fechaHora))
+  function alCancelar(turno: TurnoApi) {
+    setTurnoACancelar(null)
+    setRefresco((valor) => valor + 1)
+    mostrarAviso(
+      `Inscripción de ${turno.paciente.apellido}, ${turno.paciente.nombre} cancelada. El número ${turno.numeroOrdenDia ?? ''} no se reutiliza.`,
+    )
+  }
 
   return (
-    <DashboardLayout rol="SECRETARIA" usuarioLbl="Secretaría (sesión de ejemplo)">
+    <DashboardLayout rol="SECRETARIA">
       <div className="space-y-5">
-        {/* Resumen del día */}
-        <section aria-label="Resumen del día">
-          <div className="mb-2.5 flex items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold text-primary-900">Resumen de hoy</h2>
-            <span className="text-xs text-slate-400">Datos de ejemplo — sin conexión a la base</span>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary-600">Jornada administrativa</p>
+            <h1 className="mt-1 text-lg font-bold text-primary-950 sm:text-xl">Hola{usuario?.nombre ? `, ${usuario.nombre}` : ''}</h1>
+            <p className="mt-0.5 text-sm capitalize text-slate-500">{fechaLinda(fecha)}</p>
           </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-            <StatCard
-              titulo="Turnos programados"
-              valor={consultas.length}
-              detalle="aún no llegaron"
-              icono={<CalendarClock className="h-4.5 w-4.5" aria-hidden="true" />}
-            />
-            <StatCard
-              titulo="Ya llegaron"
-              valor={llegaron.length}
-              detalle="presentes en consultorio"
-              icono={<DoorOpen className="h-4.5 w-4.5" aria-hidden="true" />}
-              tono="verde"
-            />
-            <StatCard
-              titulo="En espera"
-              valor={esperan.length}
-              detalle="sala de espera"
-              icono={<UsersRound className="h-4.5 w-4.5" aria-hidden="true" />}
-              tono="celeste"
-            />
-            <StatCard
-              titulo="Atendidos"
-              valor={atendidos.length}
-              detalle="finalizados hoy"
-              icono={<ClipboardList className="h-4.5 w-4.5" aria-hidden="true" />}
-              tono="azul"
-            />
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setRefresco((valor) => valor + 1)}
+              className="inline-flex items-center gap-2 rounded-xl border border-primary-200 bg-white px-3 py-2 text-sm font-semibold text-primary-800 transition hover:bg-primary-50"
+            >
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+              Actualizar
+            </button>
+            <button
+              type="button"
+              onClick={() => setModalInscripcion(true)}
+              className="inline-flex items-center gap-2 rounded-xl bg-primary-900 px-4 py-2.5 text-sm font-semibold text-white shadow-card transition hover:bg-primary-800"
+            >
+              <CalendarPlus className="h-4 w-4" aria-hidden="true" />
+              Inscribir paciente
+            </button>
           </div>
+        </div>
+
+        {aviso && (
+          <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+            {aviso}
+          </p>
+        )}
+        {error && (
+          <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+            {error}
+          </p>
+        )}
+
+        <section aria-label="Accesos rápidos" className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          <Link
+            to="/secretaria/pacientes/nuevo"
+            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
+          >
+            <UserPlus className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
+            Registrar paciente nuevo
+          </Link>
+          <Link
+            to="/secretaria/pacientes"
+            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
+          >
+            <Search className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
+            Buscar pacientes
+          </Link>
+          <Link
+            to="/secretaria/historias"
+            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
+          >
+            <ClipboardList className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
+            Historias clínicas
+          </Link>
+          <Link
+            to="/secretaria/estadisticas"
+            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
+          >
+            <BarChart3 className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
+            Estadísticas e informes
+          </Link>
+          <a href="#pacientes-del-dia" className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50">
+            <Users className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
+            Pacientes del día
+          </a>
+          <button type="button" onClick={() => { setVerCancelados(true); setFiltroJornada('TODOS') }} className="rounded-xl border border-primary-100 bg-white p-3 text-left text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50">
+            <Filter className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
+            Inscripciones canceladas
+          </button>
         </section>
 
-        {/* Acciones rápidas de recepción */}
-        <section className="grid gap-4 sm:grid-cols-2" aria-label="Acciones de recepción">
-          <div className="rounded-2xl border border-primary-100 bg-white p-4 shadow-card sm:p-5">
-            <h2 className="flex items-center gap-2 text-sm font-semibold text-primary-900">
-              <Search className="h-4 w-4 text-primary-400" aria-hidden="true" />
+        <Card className="flex flex-wrap items-end gap-3 p-4">
+          <label htmlFor="fechaRecepcion" className="text-sm font-semibold text-primary-900">
+            Día de atención
+            <input
+              id="fechaRecepcion"
+              type="date"
+              value={fecha}
+              onChange={(event) => {
+                setFecha(event.target.value)
+                setTurnos([])
+                setCargando(true)
+                setVerCancelados(false)
+                setFiltroJornada('TODOS')
+              }}
+              className="ml-2 rounded-xl border border-primary-100 bg-slate-50 px-3 py-2 text-sm text-primary-950 outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-200"
+            />
+          </label>
+          <p className="text-xs text-slate-500">Los pacientes se atienden por orden de inscripción, sin horarios individuales.</p>
+        </Card>
+
+        <section aria-label="Resumen del día" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <StatCard titulo="Inscriptos" valor={turnos.length} detalle="total del día" icono={<CalendarDays className="h-4.5 w-4.5" aria-hidden="true" />} />
+          <StatCard
+            titulo="En espera"
+            valor={enEspera.length}
+            detalle="aguardando atención"
+            icono={<Users className="h-4.5 w-4.5" aria-hidden="true" />}
+            tono="celeste"
+          />
+          <StatCard
+            titulo="En atención"
+            valor={enAtencion.length}
+            detalle="consulta en curso"
+            icono={<Clock3 className="h-4.5 w-4.5" aria-hidden="true" />}
+            tono="azul"
+          />
+          <StatCard
+            titulo="Atendidos"
+            valor={atendidos.length}
+            detalle="finalizados"
+            icono={<CheckCircle2 className="h-4.5 w-4.5" aria-hidden="true" />}
+            tono="verde"
+          />
+          <StatCard
+            titulo="Cancelados"
+            valor={cancelados.length}
+            detalle="fuera de la lista activa"
+            icono={<Filter className="h-4.5 w-4.5" aria-hidden="true" />}
+          />
+        </section>
+
+        <section aria-label="Buscar paciente" className="max-w-2xl">
+          <Card className="p-4 sm:p-5">
+            <h2 className="flex items-center gap-2 text-sm font-bold text-primary-900">
+              <Search className="h-4 w-4 text-primary-500" aria-hidden="true" />
               Buscar paciente
             </h2>
-            <input
-              type="search"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Nombre, apellido o DNI…"
-              className="mt-3 w-full rounded-xl border border-primary-100 bg-slate-50 px-3.5 py-2.5 text-sm text-primary-950 outline-none transition placeholder:text-slate-400 focus:border-accent-400 focus:ring-2 focus:ring-accent-200"
-              aria-label="Buscar paciente por nombre, apellido o DNI"
-            />
-            <div className="mt-3 min-h-10">
-              {q && resultados.length === 0 && (
-                <p className="px-1 text-xs text-slate-400">Sin coincidencias en los datos de ejemplo.</p>
-              )}
-              <ul className="space-y-2">
-                {resultados.slice(0, 3).map((p) => (
-                  <li
-                    key={p.id}
-                    className="flex items-center justify-between gap-2 rounded-xl bg-primary-50/70 px-3 py-2"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-primary-900">
-                        {nombreCompleto(p)}
+            <p className="mt-1 text-xs text-slate-500">Encontrá la ficha o la historia clínica por nombre o DNI.</p>
+            <div className="relative mt-3">
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+              <input
+                type="search"
+                value={busquedaPaciente}
+                onChange={(event) => setBusquedaPaciente(event.target.value)}
+                placeholder="Nombre, apellido o DNI"
+                aria-label="Buscar paciente por nombre, apellido o DNI"
+                className="w-full rounded-xl border border-primary-100 bg-slate-50 py-2.5 pl-10 pr-3.5 text-sm text-primary-950 outline-none transition placeholder:text-slate-400 focus:border-accent-400 focus:ring-2 focus:ring-accent-200"
+              />
+            </div>
+            {buscandoPaciente && <p className="mt-2 text-xs text-slate-500">Buscando…</p>}
+            {resultadosPaciente.length > 0 && (
+              <ul className="mt-2 divide-y divide-primary-100 overflow-hidden rounded-xl border border-primary-100">
+                {resultadosPaciente.map((paciente) => (
+                  <li key={paciente.id}>
+                    <Link
+                      to={`/secretaria/pacientes/${paciente.id}`}
+                      className="flex items-center justify-between gap-2 px-3.5 py-2.5 transition hover:bg-primary-50"
+                    >
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold text-primary-900">
+                          {paciente.apellido}, {paciente.nombre}
+                        </span>
+                        <span className="block text-xs text-slate-500">DNI {paciente.dni}</span>
                       </span>
-                      <span className="block text-xs text-slate-500">
-                        DNI {p.dni} · {p.obraSocial ?? 'sin cobertura'}
-                      </span>
-                    </span>
-                    <span className="shrink-0 rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-                      ejemplo
-                    </span>
+                      <span className="text-xs font-semibold text-primary-700">Ver ficha</span>
+                    </Link>
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-primary-100 bg-white p-4 shadow-card sm:p-5">
-            <h2 className="text-sm font-semibold text-primary-900">Nuevos pacientes</h2>
-            <p className="mt-2 text-xs leading-relaxed text-slate-500 sm:text-sm">
-              Registro disponible al conectar la base de datos (etapa 2). La misma pantalla servirá para
-              gestionar los pacientes existentes.
-            </p>
-            <div className="mt-4 flex flex-col gap-2.5 sm:flex-row">
-              <span
-                aria-disabled="true"
-                className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-primary-950 px-4 py-2.5 text-sm font-semibold text-white opacity-60"
-              >
-                <UserPlus className="h-4 w-4" aria-hidden="true" />
-                Registrar paciente
-              </span>
-              <span
-                aria-disabled="true"
-                className="inline-flex flex-1 cursor-not-allowed items-center justify-center gap-2 rounded-xl border border-primary-200 px-4 py-2.5 text-sm font-semibold text-primary-800 opacity-60"
-              >
-                <Users className="h-4 w-4" aria-hidden="true" />
-                Listado completo
-              </span>
-            </div>
-          </div>
-        </section>
-
-        {/* Agenda + llegadas */}
-        <section className="grid gap-5 xl:grid-cols-3" aria-label="Agenda y llegadas">
-          <div className="xl:col-span-2">
-            <div className="mb-2.5 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-primary-900">Agenda del consultorio</h2>
-              <Link to="/secretaria/agenda" className="text-xs font-medium text-primary-700 hover:underline">
-                Ver semana completa
-              </Link>
-            </div>
-            <AgendaDelDia turnos={agendaHoy} />
-          </div>
-          <div>
-            <h2 className="mb-2.5 text-sm font-semibold text-primary-900">Llegadas pendientes de confirmar</h2>
-            <div className="rounded-2xl border border-primary-100 bg-white p-4 shadow-card sm:p-5">
-              <p className="text-xs leading-relaxed text-slate-500">
-                Al conectar la base (etapa 2) el botón “Registrar llegada” de la agenda guardará la hora en
-                PostgreSQL y sumará al paciente a la cola en tiempo real. Las horas muestran{' '}
-                <span className="font-medium text-primary-900">hora de llegada</span> ya registrada.
+            )}
+            {errorBusquedaPaciente && <p role="alert" className="mt-2 text-xs text-rose-700">{errorBusquedaPaciente}</p>}
+            {busquedaPaciente.trim().length >= 2 && !buscandoPaciente && !errorBusquedaPaciente && resultadosPaciente.length === 0 && (
+              <p className="mt-2 text-xs text-slate-500">
+                Sin coincidencias. Podés{' '}
+                <Link to="/secretaria/pacientes/nuevo" className="font-semibold text-primary-700 underline">
+                  registrar un paciente nuevo
+                </Link>
+                .
               </p>
-              <ul className="mt-3 space-y-2">
-                {turnosDemo
-                  .filter((t) => t.estado === 'LLEGO' && t.horaLlegada)
-                  .map((t) => (
-                    <li key={t.id} className="flex items-center justify-between gap-2 text-sm">
-                      <span className="min-w-0 truncate font-medium text-primary-900">
-                        {nombreCompleto(t.paciente)}
-                      </span>
-                      <span className="shrink-0 text-xs text-slate-400">{horaDe(t.horaLlegada!)}</span>
-                    </li>
-                  ))}
-              </ul>
+            )}
+          </Card>
+
+        </section>
+
+        <section id="pacientes-del-dia" aria-label="Pacientes inscriptos">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-bold text-primary-900">
+              {mostrandoCancelados ? 'Inscripciones canceladas' : 'Pacientes inscriptos'}
+            </h2>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500">
+                {activos.length} activos · {cancelados.length} cancelados
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (mostrandoCancelados) {
+                    setVerCancelados(false)
+                    setFiltroJornada('TODOS')
+                  } else {
+                    setVerCancelados(true)
+                  }
+                }}
+                className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${
+                  mostrandoCancelados
+                    ? 'border-rose-300 bg-rose-50 text-rose-800'
+                    : 'border-primary-200 bg-white text-primary-800 hover:bg-primary-50'
+                }`}
+              >
+                {mostrandoCancelados ? 'Volver a activos' : `Ver cancelados (${cancelados.length})`}
+              </button>
             </div>
           </div>
+
+          <div className="mb-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
+            <input type="search" value={busquedaJornada} onChange={(event) => setBusquedaJornada(event.target.value)} placeholder="Filtrar por nombre, apellido o DNI" aria-label="Filtrar pacientes del día" className="min-w-0 rounded-xl border border-primary-100 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-200" />
+            <select aria-label="Filtrar por estado" value={filtroJornada} onChange={(event) => setFiltroJornada(event.target.value as FiltroJornada)} className="rounded-xl border border-primary-100 bg-white px-3 py-2.5 text-sm text-primary-900">
+              <option value="TODOS">Todos los estados</option><option value="EN_ESPERA">En espera</option><option value="EN_ATENCION">En atención</option><option value="ATENDIDO">Atendidos</option><option value="CANCELADO">Cancelados</option>
+            </select>
+          </div>
+
+          {cargando ? (
+            <Card className="flex justify-center p-12">
+              <Loader2 className="h-7 w-7 animate-spin text-primary-800" aria-hidden="true" />
+            </Card>
+          ) : (
+            <ListaInscripciones
+              turnos={visibles}
+              basePacientes="/secretaria/pacientes"
+              perfil="SECRETARIA"
+              onCancelar={(turno) => setTurnoACancelar(turno)}
+              vacio={
+                mostrandoCancelados
+                  ? 'No hay inscripciones canceladas para este día.'
+                  : 'Todavía no hay pacientes inscriptos para este día. Inscribí al primero con el botón superior.'
+              }
+            />
+          )}
         </section>
+        <HistorialAtendidosPorJornada perfil="SECRETARIA" />
       </div>
+
+      <InscripcionModal
+        abierto={modalInscripcion}
+        fechaInicial={fecha}
+        onCerrar={() => setModalInscripcion(false)}
+        onInscripto={alInscribir}
+      />
+      <ModalCancelacion
+        turno={turnoACancelar}
+        onCerrar={() => setTurnoACancelar(null)}
+        onCancelado={alCancelar}
+      />
     </DashboardLayout>
   )
 }

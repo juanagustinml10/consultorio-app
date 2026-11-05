@@ -1,0 +1,1 @@
+SELECT "usuarioId", "creadoEn", "expiraEn" FROM sesiones ORDER BY "creadoEn" DESC LIMIT 5;

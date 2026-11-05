@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Eye, EyeOff, HeartPulse, Info, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, HeartPulse, Loader2 } from 'lucide-react'
+import { useAuth } from '@/lib/auth'
 
 const esquema = z.object({
   email: z
@@ -20,8 +21,9 @@ type Datos = z.infer<typeof esquema>
 
 export default function LoginPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [mostrar, setMostrar] = useState(false)
-  const [aviso, setAviso] = useState(false)
+  const [errorApi, setErrorApi] = useState<string | null>(null)
 
   const {
     register,
@@ -32,18 +34,19 @@ export default function LoginPage() {
     defaultValues: { email: '', contrasena: '' },
   })
 
-  const onSubmit = handleSubmit(async (_datos: Datos) => {
-    // PENDIENTE (etapa 2): autenticar contra POST /api/auth/login y redirigir
-    // a /medico o /secretaria según el rol que devuelva el backend.
-    setAviso(true)
-    await new Promise((r) => setTimeout(r, 400))
-    setAviso(false)
+  const onSubmit = handleSubmit(async (datos: Datos) => {
+    setErrorApi(null)
+    try {
+      const usuario = await login(datos.email, datos.contrasena)
+      // Redirigir según rol
+      navigate(usuario.rol === 'MEDICO' ? '/medico' : '/secretaria', { replace: true })
+    } catch (e) {
+      setErrorApi(e instanceof Error ? e.message : 'Error al iniciar sesión')
+    }
   })
 
-  void navigate // se usará al integrar el backend
-
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-primary-50/60 to-white">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10 sm:px-6">
         <div className="mb-8 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-900 shadow-card">
@@ -52,7 +55,7 @@ export default function LoginPage() {
           <h1 className="mt-4 text-xl font-bold tracking-tight text-primary-900 sm:text-2xl">
             Consultorio Médico
           </h1>
-          <p className="mt-1 text-sm text-slate-500">Ingresá tus credenciales para continuar</p>
+          <p className="mt-1.5 text-sm text-slate-500">Ingresá tus credenciales para continuar</p>
         </div>
 
         <form
@@ -60,16 +63,12 @@ export default function LoginPage() {
           className="rounded-2xl border border-primary-100 bg-white p-6 shadow-card sm:p-8"
           noValidate
         >
-          {aviso && (
+          {errorApi && (
             <div
-              role="status"
-              className="mb-5 flex gap-2.5 rounded-xl border border-accent-200 bg-accent-50 p-3.5 text-xs text-primary-800 sm:text-sm"
+              role="alert"
+              className="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-3.5 text-sm text-rose-700"
             >
-              <Info className="h-4 w-4 shrink-0 text-accent-600" aria-hidden="true" />
-              <span>
-                Autenticación pendiente: se conectará con la API en la etapa 2. Por ahora la validación es
-                visual.
-              </span>
+              {errorApi}
             </div>
           )}
 
@@ -122,16 +121,21 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-900 px-4 py-3 text-sm font-semibold text-white shadow-card transition hover:bg-primary-800 disabled:opacity-60"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-primary-900 px-4 py-3 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card-hover disabled:opacity-60"
           >
             {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
             Ingresar
           </button>
 
-          <p className="mt-5 text-center text-xs text-slate-400">
-            El acceso distingue los roles <span className="font-medium text-slate-500">médico</span> y{' '}
-            <span className="font-medium text-slate-500">secretaría</span>, que se activará con la API.
-          </p>
+          <div className="mt-5 rounded-lg bg-slate-50 p-3 text-center text-xs text-slate-500">
+            <p className="font-medium">Usuarios de prueba:</p>
+            <p className="mt-1">
+              Médico: <span className="font-mono">medico@demo.com</span> / <span className="font-mono">demo1234</span>
+            </p>
+            <p>
+              Secretaria: <span className="font-mono">secretaria@demo.com</span> / <span className="font-mono">demo1234</span>
+            </p>
+          </div>
         </form>
 
         <Link

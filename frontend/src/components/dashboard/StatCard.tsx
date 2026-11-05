@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 
 interface StatCardProps {
   titulo: string
@@ -96,11 +97,11 @@ export function AccesoRapido({ titulo, descripcion, icono, to, pendiente }: Acce
   }
 
   return (
-    <a
-      href={to}
+    <Link
+      to={to ?? '#'}
       className="flex items-start gap-3 rounded-2xl border border-primary-100 bg-white p-4 shadow-card transition hover:-translate-y-0.5 hover:shadow-card-hover sm:p-5"
     >
       {contenido}
-    </a>
+    </Link>
   )
 }

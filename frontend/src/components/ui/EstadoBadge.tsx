@@ -1,15 +1,10 @@
 import type { EstadoTurno } from '@/types/domain'
 
 const ESTADOS: Record<EstadoTurno, { etiqueta: string; clases: string; punto: string }> = {
-  PROGRAMADO: {
-    etiqueta: 'Programado',
-    clases: 'bg-slate-100 text-slate-600',
-    punto: 'bg-slate-400',
-  },
-  LLEGO: {
+  EN_ESPERA: {
     etiqueta: 'En espera',
     clases: 'bg-accent-100 text-accent-600',
-    punto: 'bg-accent-400',
+    punto: 'bg-accent-500',
   },
   EN_ATENCION: {
     etiqueta: 'En atención',
@@ -20,11 +15,6 @@ const ESTADOS: Record<EstadoTurno, { etiqueta: string; clases: string; punto: st
     etiqueta: 'Atendido',
     clases: 'bg-emerald-50 text-emerald-700',
     punto: 'bg-emerald-500',
-  },
-  AUSENTE: {
-    etiqueta: 'Ausente',
-    clases: 'bg-amber-50 text-amber-700',
-    punto: 'bg-amber-500',
   },
   CANCELADO: {
     etiqueta: 'Cancelado',

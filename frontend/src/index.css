@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -41,4 +42,18 @@ body {
 /* Anclas bajo encabezados fijos */
 [id] {
   scroll-margin-top: 5rem;
+}
+
+/* Rejilla sutil para fondos oscuros (hero, paneles de marca) */
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 80% at 50% 20%, black 30%, transparent 75%);
+}
+
+/* Números tabulares para horas y métricas */
+.numeros-tabulares {
+  font-variant-numeric: tabular-nums;
 }

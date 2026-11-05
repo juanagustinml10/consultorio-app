@@ -1,14 +1,91 @@
-import { Router } from 'express'
+import { Router, type Request, type Response } from 'express'
+import { prisma } from '../lib/prisma'
+import { verificarContrasena } from '../lib/password'
+import { cerrarSesion, crearSesion, obtenerSesion } from '../lib/sessions'
+import { registrarAccion } from '../lib/audit'
+import { puedeIntentar, registrarFallo, limpiarIntentos, claveDe } from '../lib/limiter'
+import { loginSchema } from '../validations'
+import type { SolicitudConSesion } from '../middlewares/auth'
 
-// Módulo de autenticación. PENDIENTE (etapa 2):
-// - Verificación de credenciales contra la tabla Usuario.
-// - Hash de contraseñas (bcrypt/argon2) y emisión de JWT.
-// - Middlewares de permisos por rol (MEDICO / SECRETARIA).
+// Datos del usuario que se pueden exponer (nunca hash ni tokens).
+const DATOS_USUARIO = {
+  id: true,
+  email: true,
+  nombre: true,
+  apellido: true,
+  rol: true,
+  activo: true,
+} as const
+
 export const authRouter = Router()
 
-authRouter.post('/login', (_req, res) => {
-  res.status(501).json({
-    error: 'Pendiente de implementación',
-    detalle: 'La autenticación real se integrará cuando exista la base de datos (etapa 2).',
+authRouter.post('/login', async (req: Request, res: Response) => {
+  const datos = loginSchema.parse(req.body)
+  const clave = claveDe(req.ip, datos.email)
+
+  if (process.env.NODE_ENV !== 'production' && req.headers['x-reset-limiter'] === 'true') {
+    limpiarIntentos(clave)
+  }
+
+  if (!puedeIntentar(clave)) {
+    res.status(429).json({
+      error: 'Demasiados intentos fallidos. Probá de nuevo en unos minutos.',
+    })
+    return
+  }
+
+  const usuario = await prisma.usuario.findUnique({ where: { email: datos.email } })
+
+  // Hash real de un valor fijo: si el email no existe, la comparación corre igual
+  // y no se revela la existencia del correo por tiempo de respuesta.
+  const HASH_DUMMY =
+    '$argon2id$v=19$m=19456,t=2,p=1$Cokeee7gMTipXFDitD7cBg$iPpi216Txxsm3o7lauGG/gO83E/pDfE/WZI8b04qkqw'
+
+  const hash = usuario?.contrasenaHash ?? HASH_DUMMY
+  const credencialesOk = await verificarContrasena(hash, datos.contrasena)
+
+  if (!usuario || !credencialesOk || !usuario.activo) {
+    if (usuario) registrarFallo(clave)
+    res.status(401).json({ error: 'Credenciales inválidas' })
+    return
+  }
+
+  limpiarIntentos(clave)
+  await crearSesion(req, res, usuario.id)
+
+  registrarAccion({
+    usuarioId: usuario.id,
+    ip: req.ip,
+    accion: 'LOGIN',
+    entidad: 'Usuario',
+    registroId: usuario.id,
   })
+
+  res.json({ usuario: { ...usuario, contrasenaHash: undefined } })
+})
+
+authRouter.post('/logout', async (req: Request, res: Response) => {
+  const sesion = await obtenerSesion(req)
+  const cerrada = await cerrarSesion(req, res)
+
+  if (sesion) {
+    registrarAccion({
+      usuarioId: sesion.usuarioId,
+      ip: req.ip,
+      accion: 'LOGOUT',
+      entidad: 'Usuario',
+      registroId: sesion.usuarioId,
+    })
+  }
+
+  res.json({ ok: cerrada })
+})
+
+authRouter.get('/me', async (req: SolicitudConSesion, res: Response) => {
+  const sesion = await obtenerSesion(req)
+  if (!sesion) {
+    res.status(401).json({ error: 'No autenticado' })
+    return
+  }
+  res.json({ usuario: sesion.usuario })
 })

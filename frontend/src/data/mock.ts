@@ -1,4 +1,4 @@
-import type { AvisoSitio, Actividad, Paciente, Turno } from '@/types/domain'
+import type { AvisoSitio } from '@/types/domain'
 
 /**
  * DATOS DE EJEMPLO (ficticios, solo para visualizar las pantallas).
@@ -91,7 +91,7 @@ export const avisosSitio: AvisoSitio[] = [
     id: 'aviso-1',
     titulo: 'Ejemplo: atención suspendida por vacaciones',
     mensaje:
-      'Del 10 al 24 de enero la atención se encuentra suspendida por vacaciones. Los turnos se reprograman por WhatsApp. (aviso de ejemplo)',
+      'Del 10 al 24 de enero la atención se encuentra suspendida por vacaciones. Consultá novedades por WhatsApp. (aviso de ejemplo)',
   },
 ]
 
@@ -109,47 +109,9 @@ export const preguntasFrecuentes = [
     respuesta: 'Documento, carnet de vacunas, estudios previos si los tenés y la lista de medicamentos que consumís.',
   },
   {
-    pregunta: '¿Puedo cancelar o reprogramar un turno?',
-    respuesta: 'Sí, se pide avisar con al menos 24 horas de anticipación para habilitar el turno a otro paciente.',
+    pregunta: '¿Puedo cancelar mi inscripción del día?',
+    respuesta: 'Sí, se pide avisar con anticipación para liberar el lugar. El número asignado no se reutiliza.',
   },
 ]
 
-// ---- Pacientes ficticios ----
-export const pacientesDemo: Paciente[] = [
-  { id: 'p1', apellido: 'García', nombre: 'Ana', dni: '12345678', telefono: '11 1000-0001', obraSocial: 'Obra Social Ejemplo A' },
-  { id: 'p2', apellido: 'Fernández', nombre: 'Carlos', dni: '23456789', telefono: '11 1000-0002', obraSocial: 'Prepaga Ejemplo 2' },
-  { id: 'p3', apellido: 'Rodríguez', nombre: 'María', dni: '34567890', telefono: '11 1000-0003', obraSocial: 'Obra Social Ejemplo A' },
-  { id: 'p4', apellido: 'López', nombre: 'Julián', dni: '45678901', telefono: '11 1000-0004', obraSocial: 'Particular' },
-  { id: 'p5', apellido: 'Sánchez', nombre: 'Lucía', dni: '56789012', telefono: '11 1000-0005', obraSocial: 'Prepaga Ejemplo 3' },
-]
 
-const hoy = new Date()
-const esHoy = (h: number, m: number) => {
-  const d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), h, m)
-  return d.toISOString()
-}
-
-export const turnosDemo: Turno[] = [
-  { id: 't1', paciente: pacientesDemo[0], fechaHora: esHoy(9, 0), duracionMin: 30, motivo: 'Seguimiento de hipertensión', estado: 'ATENDIDO', horaLlegada: esHoy(8, 50) },
-  { id: 't2', paciente: pacientesDemo[1], fechaHora: esHoy(9, 30), duracionMin: 30, motivo: 'Dolor lumbar — revisación', estado: 'ATENDIDO', horaLlegada: esHoy(9, 20) },
-  { id: 't3', paciente: pacientesDemo[2], fechaHora: esHoy(10, 0), duracionMin: 30, motivo: 'Resultados de análisis', estado: 'EN_ATENCION', horaLlegada: esHoy(9, 45) },
-  { id: 't4', paciente: pacientesDemo[3], fechaHora: esHoy(10, 30), duracionMin: 30, motivo: 'Control de diabetes', estado: 'LLEGO', horaLlegada: esHoy(10, 15) },
-  { id: 't5', paciente: pacientesDemo[4], fechaHora: esHoy(11, 0), duracionMin: 30, motivo: 'Dolor de garganta y cefalea', estado: 'LLEGO', horaLlegada: esHoy(10, 38) },
-  { id: 't6', paciente: { id: 'p6', apellido: 'Molina', nombre: 'Rubén', dni: '67890123', obraSocial: 'Obra Social Ejemplo A' }, fechaHora: esHoy(11, 30), duracionMin: 30, motivo: 'Consulta general', estado: 'PROGRAMADO' },
-  { id: 't7', paciente: { id: 'p7', apellido: 'Torres', nombre: 'Valeria', dni: '78901234', obraSocial: 'Prepaga Ejemplo 2' }, fechaHora: esHoy(12, 0), duracionMin: 30, motivo: 'Certificados y recetas', estado: 'PROGRAMADO' },
-]
-
-export const actividadDemo: Actividad[] = [
-  { id: 'a1', hora: '10:20', tipo: 'atencion', descripcion: 'Finalizó la atención de Carlos Fernández' },
-  { id: 'a2', hora: '10:05', tipo: 'atencion', descripcion: 'Paciente María Rodríguez en consulta' },
-  { id: 'a3', hora: '10:15', tipo: 'paciente', descripcion: 'Julián López llegó a recepción' },
-  { id: 'a4', hora: '09:58', tipo: 'paciente', descripcion: 'Lucía Sánchez llegó a recepción' },
-  { id: 'a5', hora: '09:30', tipo: 'turno', descripcion: 'Se reservó el turno de 12:00 por WhatsApp' },
-]
-
-// Turnos de próximos días (para la agenda)
-export const turnosProximosDias: Turno[] = [
-  { id: 'f1', paciente: pacientesDemo[0], fechaHora: '2026-11-04T09:00', duracionMin: 30, motivo: 'Control de presión arterial', estado: 'PROGRAMADO' },
-  { id: 'f2', paciente: pacientesDemo[3], fechaHora: '2026-11-04T10:00', duracionMin: 30, motivo: 'Consulta general', estado: 'PROGRAMADO' },
-  { id: 'f3', paciente: pacientesDemo[4], fechaHora: '2026-11-05T16:00', duracionMin: 30, motivo: 'Resultados de estudios', estado: 'PROGRAMADO' },
-]

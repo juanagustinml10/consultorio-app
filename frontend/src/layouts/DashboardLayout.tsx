@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { HeartPulse, LogOut, Menu, X } from 'lucide-react'
+import { BarChart3, FolderClosed, HeartPulse, LayoutDashboard, LogOut, Menu, Users, X } from 'lucide-react'
+import { useAuth } from '@/lib/auth'
 import type { Rol } from '@/types/domain'
 
 interface ItemNav {
@@ -12,61 +13,23 @@ interface ItemNav {
 }
 
 const NAV_MEDICO: ItemNav[] = [
-  { to: '/medico', label: 'Resumen del día', icono: <LayoutDashboardIcon />, fin: true },
-  { to: '/medico/pacientes', label: 'Pacientes', icono: <UsersIcon /> },
-  { to: '/medico/historias', label: 'Historias clínicas', icono: <FolderIcon />, badge: 'etapa 2' },
-  { to: '/medico/agenda', label: 'Agenda', icono: <CalendarIcon />, badge: 'etapa 2' },
+  { to: '/medico', label: 'Resumen del día', icono: <LayoutDashboard className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />, fin: true },
+  { to: '/medico/pacientes', label: 'Pacientes', icono: <Users className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /> },
+  { to: '/medico/historias', label: 'Historias clínicas', icono: <FolderClosed className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /> },
+  { to: '/medico/estadisticas', label: 'Estadísticas e informes', icono: <BarChart3 className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /> },
 ]
 
 const NAV_SECRETARIA: ItemNav[] = [
-  { to: '/secretaria', label: 'Resumen del día', icono: <LayoutDashboardIcon />, fin: true },
-  { to: '/secretaria/llegadas', label: 'Registrar llegada', icono: <UsersIcon />, fin: true },
-  { to: '/secretaria/agenda', label: 'Agenda', icono: <CalendarIcon />, badge: 'etapa 2' },
+  { to: '/secretaria', label: 'Jornada e inscripciones', icono: <LayoutDashboard className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />, fin: true },
+  { to: '/secretaria/pacientes', label: 'Pacientes', icono: <Users className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /> },
+  { to: '/secretaria/historias', label: 'Historias clínicas', icono: <FolderClosed className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /> },
+  { to: '/secretaria/estadisticas', label: 'Estadísticas e informes', icono: <BarChart3 className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /> },
 ]
 
 const NOMBRES_PANEL = {
   MEDICO: 'Panel del médico',
   SECRETARIA: 'Panel de recepción',
 } as const
-
-// Iconos trazados inline para no acoplar nombres de Lucide al layout
-function LayoutDashboardIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px] shrink-0">
-      <rect width="7" height="9" x="3" y="3" rx="1" />
-      <rect width="7" height="5" x="14" y="3" rx="1" />
-      <rect width="7" height="9" x="14" y="12" rx="1" />
-      <rect width="7" height="5" x="3" y="16" rx="1" />
-    </svg>
-  )
-}
-function UsersIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px] shrink-0">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  )
-}
-function FolderIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px] shrink-0">
-      <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
-    </svg>
-  )
-}
-function CalendarIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px] shrink-0">
-      <path d="M8 2v4" />
-      <path d="M16 2v4" />
-      <rect width="18" height="18" x="3" y="4" rx="2" />
-      <path d="M3 10h18" />
-    </svg>
-  )
-}
 
 function NavItem({ item, onNavigate }: { item: ItemNav; onNavigate?: () => void }) {
   return (
@@ -78,7 +41,7 @@ function NavItem({ item, onNavigate }: { item: ItemNav; onNavigate?: () => void 
         `flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition ${
           isActive
             ? 'bg-primary-800 text-white shadow-card'
-            : 'text-accent-100/80 hover:bg-white/10 hover:text-white'
+            : 'text-white/70 hover:bg-white/10 hover:text-white'
         }`
       }
     >
@@ -95,21 +58,32 @@ function NavItem({ item, onNavigate }: { item: ItemNav; onNavigate?: () => void 
   )
 }
 
+function inicialesDe(nombre: string): string {
+  const partes = nombre.split(' ').filter((p) => p && !p.startsWith('(') && !p.startsWith('—'))
+  return partes.slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('')
+}
+
 interface DashboardLayoutProps {
   rol: Rol
-  /** Nombre del usuario conectado (etapa 2: vendrá de la sesión) */
-  usuarioLbl: string
   children: ReactNode
 }
 
-export function DashboardLayout({ rol, usuarioLbl, children }: DashboardLayoutProps) {
+export function DashboardLayout({ rol, children }: DashboardLayoutProps) {
   const [drawer, setDrawer] = useState(false)
   const navigate = useNavigate()
+  const { usuario, logout } = useAuth()
+
+  const usuarioLbl = usuario ? `${usuario.nombre} ${usuario.apellido}` : ''
 
   const nav = rol === 'MEDICO' ? NAV_MEDICO : NAV_SECRETARIA
 
+  const cerrarSesion = async () => {
+    await logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-[#f5f8fd]">
       {/* Sidebar (pantallas grandes) */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col bg-primary-950 p-4 lg:flex">
         <Link to="/" className="flex items-center gap-2.5 px-1.5 py-1">
@@ -124,10 +98,21 @@ export function DashboardLayout({ rol, usuarioLbl, children }: DashboardLayoutPr
             <NavItem key={i.to} item={i} />
           ))}
         </nav>
-        <div className="mt-auto border-t border-white/10 pt-3">
+        <div className="mt-auto">
+          <div className="mb-2 flex items-center gap-2.5 rounded-xl bg-white/5 px-3 py-2.5">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-700 text-[11px] font-bold text-white">
+              {inicialesDe(usuarioLbl)}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-xs font-semibold text-white">{usuarioLbl}</span>
+              <span className="block text-[10px] text-white/40">
+                {rol === 'MEDICO' ? 'Médico' : 'Secretaría'}
+              </span>
+            </span>
+          </div>
           <button
             type="button"
-            onClick={() => navigate('/login')}
+            onClick={cerrarSesion}
             className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white/60 transition hover:bg-white/10 hover:text-white"
           >
             <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -139,7 +124,7 @@ export function DashboardLayout({ rol, usuarioLbl, children }: DashboardLayoutPr
       {/* Drawer móvil */}
       {drawer && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-primary-950/40" onClick={() => setDrawer(false)} aria-hidden="true" />
+          <div className="absolute inset-0 bg-primary-950/40 backdrop-blur-sm" onClick={() => setDrawer(false)} aria-hidden="true" />
           <aside className="absolute inset-y-0 left-0 flex w-72 flex-col bg-primary-950 p-4 shadow-card-hover">
             <div className="flex items-center justify-between px-1">
               <span className="flex items-center gap-2.5">
@@ -165,7 +150,7 @@ export function DashboardLayout({ rol, usuarioLbl, children }: DashboardLayoutPr
             </nav>
             <button
               type="button"
-              onClick={() => navigate('/login')}
+              onClick={cerrarSesion}
               className="flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-white/60 transition hover:bg-white/10 hover:text-white"
             >
               <LogOut className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -177,7 +162,7 @@ export function DashboardLayout({ rol, usuarioLbl, children }: DashboardLayoutPr
 
       {/* Contenido */}
       <div className="flex min-w-0 flex-1 flex-col lg:ml-64">
-        <header className="sticky top-0 z-30 border-b border-primary-100 bg-white/90 shadow-sm backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-primary-100/80 bg-white/90 shadow-sm backdrop-blur">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
             <button
               type="button"
@@ -193,19 +178,17 @@ export function DashboardLayout({ rol, usuarioLbl, children }: DashboardLayoutPr
             <div className="ml-auto flex items-center gap-2 sm:gap-3">
               <span className="hidden text-right sm:block">
                 <span className="block text-sm font-semibold text-primary-900">{usuarioLbl}</span>
-                <span className="block text-xs text-slate-500">{rol === 'MEDICO' ? 'Médico' : 'Secretaría'}</span>
+                <span className="block text-xs text-slate-400">
+                  {rol === 'MEDICO' ? 'Médico' : 'Secretaría'}
+                </span>
               </span>
               <button
                 type="button"
-                onClick={() => navigate('/login')}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-900 text-xs font-bold text-white shadow-card transition hover:bg-primary-800"
+                onClick={cerrarSesion}
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-800 text-xs font-bold text-white shadow-card transition hover:bg-primary-700"
                 title="Cuenta (cerrar sesión)"
               >
-                {usuarioLbl
-                  .split(' ')
-                  .map((p) => p[0])
-                  .slice(0, 2)
-                  .join('')}
+                {inicialesDe(usuarioLbl)}
               </button>
             </div>
           </div>

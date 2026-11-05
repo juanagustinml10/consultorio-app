@@ -3,13 +3,7 @@
 
 export type Rol = 'MEDICO' | 'SECRETARIA'
 
-export type EstadoTurno =
-  | 'PROGRAMADO'
-  | 'LLEGO'
-  | 'EN_ATENCION'
-  | 'ATENDIDO'
-  | 'AUSENTE'
-  | 'CANCELADO'
+export type EstadoTurno = 'EN_ESPERA' | 'EN_ATENCION' | 'ATENDIDO' | 'CANCELADO'
 
 export interface Paciente {
   id: string
@@ -24,12 +18,17 @@ export interface Paciente {
 export interface Turno {
   id: string
   paciente: Paciente
-  /** ISO local, p. ej. 2026-11-03T09:30 */
-  fechaHora: string
-  duracionMin: number
+  /** Fecha local YYYY-MM-DD de la atención (sin horario individual). */
+  fechaAtencion?: string
   motivo: string
   estado: EstadoTurno
-  horaLlegada?: string
+  numeroOrdenDia?: number
+  creadoEn?: string
+  cancelacion?: {
+    motivo?: string
+    fecha?: string
+    usuario?: string
+  }
 }
 
 export interface Actividad {
