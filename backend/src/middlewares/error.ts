@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
-import { Prisma } from '../generated/prisma'
+import { Prisma } from '@prisma/client'
 
 export function manejarError(error: unknown, _req: Request, res: Response, _next: NextFunction): void {
   if (error instanceof ZodError) {

@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from 'express'
-import type { Rol } from '../generated/prisma'
+import type { Rol } from '@prisma/client'
 import { obtenerSesion } from '../lib/sessions'
 
 export interface SesionActual {

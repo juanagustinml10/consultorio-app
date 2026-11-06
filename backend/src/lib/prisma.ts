@@ -1,4 +1,4 @@
-import { PrismaClient } from '../generated/prisma'
+import { PrismaClient } from '@prisma/client'
 
 // Cliente único de Prisma para toda la aplicación.
 export const prisma = new PrismaClient({

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "description": "API del sistema de gestión del consultorio médico",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",

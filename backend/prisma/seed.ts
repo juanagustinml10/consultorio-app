@@ -1,4 +1,4 @@
-import { PrismaClient } from '../src/generated/prisma'
+import { PrismaClient } from '@prisma/client'
 import { hash } from '@node-rs/argon2'
 
 // DATOS DE PRUEBA (ficticios): usuarios demo, pacientes y turnos de hoy.

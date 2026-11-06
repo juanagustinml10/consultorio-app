@@ -1,6 +1,6 @@
 import { prisma } from './prisma'
-import type { Prisma } from '../generated/prisma'
-import type { AccionAuditoria } from '../generated/prisma'
+import type { Prisma } from '@prisma/client'
+import type { AccionAuditoria } from '@prisma/client'
 
 export interface RegistrarAccionEntrada {
   usuarioId?: string | null

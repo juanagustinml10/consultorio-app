@@ -2,7 +2,7 @@ import type {
   EstadoTurno as EstadoTurnoDB,
   Paciente as PacienteDB,
   Turno as TurnoDB,
-} from '../generated/prisma'
+} from '@prisma/client'
 
 /** ISO local sin zona ("YYYY-MM-DDTHH:mm") — el frontend lo parsea como hora local. */
 export function aIsoLocal(d: Date | null | undefined): string | undefined {

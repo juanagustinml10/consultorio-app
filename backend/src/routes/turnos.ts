@@ -1,5 +1,5 @@
 import { Router, type NextFunction, type Request, type Response } from 'express'
-import { Prisma } from '../generated/prisma'
+import { Prisma } from '@prisma/client'
 import { prisma } from '../lib/prisma'
 import { estadoHaciaFrontend, estadosDbDe, serializarTurno, type EstadoTurnoFrontend } from '../lib/serialize'
 import { registrarAccion, registrarAccionEnTransaccion } from '../lib/audit'
