@@ -17,7 +17,20 @@ const app = express()
 const port = Number(process.env.PORT ?? 3001)
 const origenFrontend = process.env.CORS_ORIGIN ?? 'http://localhost:5173'
 
-app.use(cors({ origin: origenFrontend, credentials: true }))
+// Vercel finaliza TLS en su proxy; confiar un salto recupera la IP real para
+// el rate limit y permite comparar el origen same-origin detrás del HTTPS proxy.
+if (process.env.VERCEL) app.set('trust proxy', 1)
+
+app.use(cors((req, callback) => {
+  const origenMismoDominio = `${req.protocol}://${req.get('host')}`
+  const origenesPermitidos = process.env.VERCEL
+    ? [process.env.CORS_ORIGIN, origenMismoDominio].filter((origen): origen is string => Boolean(origen))
+    : [origenFrontend, origenMismoDominio]
+  callback(null, {
+    origin: origenesPermitidos,
+    credentials: true,
+  })
+}))
 app.use(express.json({ limit: '256kb' }))
 app.use(cookieParser())
 
@@ -53,6 +66,11 @@ app.use('/api', (req, res) => res.status(404).json({ error: `Ruta no encontrada:
 
 app.use(manejarError)
 
-app.listen(port, () => {
-  console.log(`API del consultorio escuchando en http://localhost:${port}`)
-})
+export default app
+
+// Vercel importa la app como función HTTP; localmente se mantiene el servidor habitual.
+if (!process.env.VERCEL) {
+  app.listen(port, () => {
+    console.log(`API del consultorio escuchando en http://localhost:${port}`)
+  })
+}

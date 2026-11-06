@@ -13,7 +13,7 @@ function hashToken(token: string): string {
 const opcionesCookie = {
   httpOnly: true,
   sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production', // en desarrollo: http://localhost sin HTTPS
+  secure: process.env.NODE_ENV === 'production' || Boolean(process.env.VERCEL), // Vercel usa HTTPS también en previews
   path: '/',
   maxAge: HORAS_SESION * 60 * 60 * 1000,
 }

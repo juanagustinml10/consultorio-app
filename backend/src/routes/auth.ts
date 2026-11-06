@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma'
 import { verificarContrasena } from '../lib/password'
 import { cerrarSesion, crearSesion, obtenerSesion } from '../lib/sessions'
 import { registrarAccion } from '../lib/audit'
-import { puedeIntentar, registrarFallo, limpiarIntentos, claveDe } from '../lib/limiter'
+import { reservarIntento, finalizarIntento, limpiarIntentos, claveDe } from '../lib/limiter'
 import { loginSchema } from '../validations'
 import type { SolicitudConSesion } from '../middlewares/auth'
 
@@ -24,44 +24,58 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   const clave = claveDe(req.ip, datos.email)
 
   if (process.env.NODE_ENV !== 'production' && req.headers['x-reset-limiter'] === 'true') {
-    limpiarIntentos(clave)
+    await limpiarIntentos(clave)
   }
 
-  if (!puedeIntentar(clave)) {
+  const intento = await reservarIntento(clave)
+  if (!intento) {
     res.status(429).json({
       error: 'Demasiados intentos fallidos. Probá de nuevo en unos minutos.',
     })
     return
   }
 
-  const usuario = await prisma.usuario.findUnique({ where: { email: datos.email } })
+  let intentoFinalizado = false
+  try {
+    const usuario = await prisma.usuario.findUnique({ where: { email: datos.email } })
 
   // Hash real de un valor fijo: si el email no existe, la comparación corre igual
   // y no se revela la existencia del correo por tiempo de respuesta.
   const HASH_DUMMY =
     '$argon2id$v=19$m=19456,t=2,p=1$Cokeee7gMTipXFDitD7cBg$iPpi216Txxsm3o7lauGG/gO83E/pDfE/WZI8b04qkqw'
 
-  const hash = usuario?.contrasenaHash ?? HASH_DUMMY
-  const credencialesOk = await verificarContrasena(hash, datos.contrasena)
+    const hash = usuario?.contrasenaHash ?? HASH_DUMMY
+    const credencialesOk = await verificarContrasena(hash, datos.contrasena)
 
-  if (!usuario || !credencialesOk || !usuario.activo) {
-    if (usuario) registrarFallo(clave)
-    res.status(401).json({ error: 'Credenciales inválidas' })
-    return
+    if (!usuario || !credencialesOk || !usuario.activo) {
+      if (intento) {
+        await finalizarIntento(intento, true)
+        intentoFinalizado = true
+      }
+      res.status(401).json({ error: 'Credenciales inválidas' })
+      return
+    }
+
+    await crearSesion(req, res, usuario.id)
+    if (intento) {
+      await finalizarIntento(intento, false)
+      intentoFinalizado = true
+    }
+
+    registrarAccion({
+      usuarioId: usuario.id,
+      ip: req.ip,
+      accion: 'LOGIN',
+      entidad: 'Usuario',
+      registroId: usuario.id,
+    })
+
+    res.json({ usuario: { ...usuario, contrasenaHash: undefined } })
+  } finally {
+    // Si falla la consulta, la sesión o la auditoría, libera la reserva contabilizándola
+    // como fallida; las solicitudes concurrentes no quedan retenidas hasta expirar.
+    if (intento && !intentoFinalizado) await finalizarIntento(intento, true)
   }
-
-  limpiarIntentos(clave)
-  await crearSesion(req, res, usuario.id)
-
-  registrarAccion({
-    usuarioId: usuario.id,
-    ip: req.ip,
-    accion: 'LOGIN',
-    entidad: 'Usuario',
-    registroId: usuario.id,
-  })
-
-  res.json({ usuario: { ...usuario, contrasenaHash: undefined } })
 })
 
 authRouter.post('/logout', async (req: Request, res: Response) => {

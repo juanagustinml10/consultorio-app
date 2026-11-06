@@ -1,5 +1,8 @@
 // Esquema de la base de datos del consultorio (Etapa 2).
-// PostgreSQL local mediante DATABASE_URL.
+// DATABASE_URL: conexión normal (pooler de Supabase o PostgreSQL local).
+// DIRECT_URL: conexión directa a Supabase, usada por Prisma CLI en
+//             `migrate deploy` / `migrate dev` / `db push` (requiere
+//             transacciones dedicadas que el pooler en modo transacción no da).
 
 generator client {
   provider = "prisma-client-js"
@@ -7,8 +10,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // ===== Enumeraciones =====
@@ -82,13 +86,13 @@ model Usuario {
   creadoEn       DateTime @default(now())
   actualizadoEn  DateTime @updatedAt
 
-  sesiones       Session[]
-  turnosCreados  Turno[]             @relation("TurnoRegistradoPor")
-  turnosCancelados Turno[]           @relation("TurnoCanceladoPor")
-  consultas      ConsultaClinica[]
+  sesiones            Session[]
+  turnosCreados       Turno[]                  @relation("TurnoRegistradoPor")
+  turnosCancelados    Turno[]                  @relation("TurnoCanceladoPor")
+  consultas           ConsultaClinica[]
   versionesCapturadas ConsultaClinicaVersion[] @relation("VersionCapturadaPor")
-  auditorias     AuditLog[]
-  pagos          Pago[]              @relation("PagoRegistradoPor")
+  auditorias          AuditLog[]
+  pagos               Pago[]                   @relation("PagoRegistradoPor")
 
   @@map("usuarios")
 }
@@ -111,13 +115,26 @@ model Session {
   @@map("sesiones")
 }
 
+// Estado compartido del límite de intentos de inicio de sesión.
+// keyHash es un HMAC del identificador (IP + email normalizado), nunca el valor original.
+model LoginRateLimit {
+  keyHash         String   @id @db.VarChar(64)
+  windowStartedAt DateTime @db.Timestamptz(6)
+  failures        Int      @default(0)
+  activeAttempts  Int      @default(0)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([windowStartedAt])
+  @@map("intentos_limite_login")
+}
+
 // Obra social o prepaga (administrable). Se relaciona con los pacientes.
 model ObraSocial {
-  id        String   @id @default(cuid())
-  nombre    String   @unique
-  activo    Boolean  @default(true)
-  notas     String?
-  creadoEn  DateTime @default(now())
+  id            String   @id @default(cuid())
+  nombre        String   @unique
+  activo        Boolean  @default(true)
+  notas         String?
+  creadoEn      DateTime @default(now())
   actualizadoEn DateTime @updatedAt
 
   pacientes Paciente[]
@@ -138,11 +155,11 @@ model Paciente {
   direccion       String?
   obraSocialId    String?
   numeroAfiliado  String?
-  notas           String?   // Observaciones administrativas
+  notas           String? // Observaciones administrativas
   creadoEn        DateTime  @default(now())
   actualizadoEn   DateTime  @updatedAt
 
-  obraSocial      ObraSocial?  @relation(fields: [obraSocialId], references: [id])
+  obraSocial      ObraSocial?      @relation(fields: [obraSocialId], references: [id])
   turnos          Turno[]
   historiaClinica HistoriaClinica?
   pagos           Pago[]
@@ -153,18 +170,18 @@ model Paciente {
 
 // Historia clínica: contiene 1 ConsultaClinica por cada visita (registros independientes).
 model HistoriaClinica {
-  id                       String   @id @default(cuid())
-  pacienteId               String   @unique
-  antecedentesPersonales   String?
-  antecedentesFamiliares   String?
-  alergias                 String?
-  medicacionHabitual       String?
-  observaciones            String?
-  version                  Int      @default(1) // Se incrementa con cada modificación de antecedentes/encabezado
-  creadoEn                 DateTime @default(now())
-  actualizadoEn            DateTime @updatedAt
+  id                     String   @id @default(cuid())
+  pacienteId             String   @unique
+  antecedentesPersonales String?
+  antecedentesFamiliares String?
+  alergias               String?
+  medicacionHabitual     String?
+  observaciones          String?
+  version                Int      @default(1) // Se incrementa con cada modificación de antecedentes/encabezado
+  creadoEn               DateTime @default(now())
+  actualizadoEn          DateTime @updatedAt
 
-  paciente Paciente          @relation(fields: [pacienteId], references: [id])
+  paciente  Paciente          @relation(fields: [pacienteId], references: [id])
   consultas ConsultaClinica[]
 
   @@map("historias_clinicas")
@@ -172,10 +189,10 @@ model HistoriaClinica {
 
 // Consulta clínica (CADA consulta es un registro independiente; nunca se sobrescribe el historial).
 model ConsultaClinica {
-  id              String   @id @default(cuid())
+  id              String    @id @default(cuid())
   historiaId      String
-  turnoId         String?  @unique
-  fecha           DateTime @default(now()) // Fecha y hora de la consulta
+  turnoId         String?   @unique
+  fecha           DateTime  @default(now()) // Fecha y hora de la consulta
   motivoConsulta  String?
   sintomas        String?
   evaluacion      String?
@@ -184,14 +201,14 @@ model ConsultaClinica {
   indicaciones    String?
   proximoControl  DateTime?
   registradoPorId String
-  version         Int      @default(1)
-  esCorreccion    Boolean  @default(false) // Identifica modificaciones como correcciones
-  creadoEn        DateTime @default(now())
-  actualizadoEn   DateTime @updatedAt
+  version         Int       @default(1)
+  esCorreccion    Boolean   @default(false) // Identifica modificaciones como correcciones
+  creadoEn        DateTime  @default(now())
+  actualizadoEn   DateTime  @updatedAt
 
-  historia      HistoriaClinica @relation(fields: [historiaId], references: [id])
-  turno         Turno?           @relation(fields: [turnoId], references: [id], onDelete: SetNull)
-  registradoPor Usuario          @relation(fields: [registradoPorId], references: [id])
+  historia      HistoriaClinica          @relation(fields: [historiaId], references: [id])
+  turno         Turno?                   @relation(fields: [turnoId], references: [id], onDelete: SetNull)
+  registradoPor Usuario                  @relation(fields: [registradoPorId], references: [id])
   versiones     ConsultaClinicaVersion[]
   pagos         Pago[]
 
@@ -201,15 +218,15 @@ model ConsultaClinica {
 
 // Versiones anteriores de cada consulta clínica (conservación del historial de cambios).
 model ConsultaClinicaVersion {
-  id           String   @id @default(cuid())
-  consultaId   String
-  version      Int      // Número de la versión de la consulta al momento de capturar el snapshot
-  datos        Json     // Snapshot completo de la consulta previa a la modificación
+  id             String   @id @default(cuid())
+  consultaId     String
+  version        Int // Número de la versión de la consulta al momento de capturar el snapshot
+  datos          Json // Snapshot completo de la consulta previa a la modificación
   capturadoPorId String?
-  capturadoEn  DateTime @default(now())
+  capturadoEn    DateTime @default(now())
 
-  consulta ConsultaClinica @relation(fields: [consultaId], references: [id], onDelete: Cascade)
-  capturadoPor Usuario?    @relation("VersionCapturadaPor", fields: [capturadoPorId], references: [id])
+  consulta     ConsultaClinica @relation(fields: [consultaId], references: [id], onDelete: Cascade)
+  capturadoPor Usuario?        @relation("VersionCapturadaPor", fields: [capturadoPorId], references: [id])
 
   @@unique([consultaId, version])
   @@map("consultas_clinicas_versiones")
@@ -218,29 +235,29 @@ model ConsultaClinicaVersion {
 // Inscripción diaria / turno de consulta.
 // El número de atención se asigna por fecha y nunca se reutiliza.
 model Turno {
-  id              String      @id @default(cuid())
-  pacienteId      String
-  fechaAtencion   DateTime    @db.Date
-  fechaHora       DateTime    // Dato histórico del modelo anterior (inicio del día)
-  horaFin         DateTime?   // Momento de finalización de la atención
-  duracionMin     Int         @default(30)
-  motivo          String?
-  estado          EstadoTurno @default(EN_ESPERA)
-  horaLlegada     DateTime?   // Dato histórico del modelo anterior (no se muestra)
-  fechaOrdenAtencion DateTime? @db.Date
-  numeroOrdenDia  Int?
-  notas           String?     // Observaciones administrativas
-  motivoCancelacion String?
-  canceladoEn     DateTime?
-  canceladoPorId  String?
-  registradoPorId String?
-  creadoEn        DateTime    @default(now())
-  actualizadoEn   DateTime    @updatedAt
+  id                 String      @id @default(cuid())
+  pacienteId         String
+  fechaAtencion      DateTime    @db.Date
+  fechaHora          DateTime // Dato histórico del modelo anterior (inicio del día)
+  horaFin            DateTime? // Momento de finalización de la atención
+  duracionMin        Int         @default(30)
+  motivo             String?
+  estado             EstadoTurno @default(EN_ESPERA)
+  horaLlegada        DateTime? // Dato histórico del modelo anterior (no se muestra)
+  fechaOrdenAtencion DateTime?   @db.Date
+  numeroOrdenDia     Int?
+  notas              String? // Observaciones administrativas
+  motivoCancelacion  String?
+  canceladoEn        DateTime?
+  canceladoPorId     String?
+  registradoPorId    String?
+  creadoEn           DateTime    @default(now())
+  actualizadoEn      DateTime    @updatedAt
 
-  paciente      Paciente      @relation(fields: [pacienteId], references: [id])
-  registradoPor Usuario?      @relation("TurnoRegistradoPor", fields: [registradoPorId], references: [id])
-  canceladoPor  Usuario?      @relation("TurnoCanceladoPor", fields: [canceladoPorId], references: [id])
-  pagos         Pago[]
+  paciente        Paciente         @relation(fields: [pacienteId], references: [id])
+  registradoPor   Usuario?         @relation("TurnoRegistradoPor", fields: [registradoPorId], references: [id])
+  canceladoPor    Usuario?         @relation("TurnoCanceladoPor", fields: [canceladoPorId], references: [id])
+  pagos           Pago[]
   consultaClinica ConsultaClinica?
 
   @@unique([fechaOrdenAtencion, numeroOrdenDia])
@@ -261,18 +278,18 @@ model OrdenAtencionDiaria {
 
 // Pago o cobertura de un turno/consulta (etapa futura: facturación completa).
 model Pago {
-  id                  String      @id @default(cuid())
-  pacienteId          String
-  turnoId             String?
-  consultaClinicaId   String?
-  importe             Decimal     @db.Decimal(10, 2)
-  metodo              MetodoPago
-  estado              EstadoPago  @default(PENDIENTE)
-  fecha               DateTime    @default(now())
-  observaciones       String?
-  registradoPorId     String?
-  creadoEn            DateTime    @default(now())
-  actualizadoEn       DateTime    @updatedAt
+  id                String     @id @default(cuid())
+  pacienteId        String
+  turnoId           String?
+  consultaClinicaId String?
+  importe           Decimal    @db.Decimal(10, 2)
+  metodo            MetodoPago
+  estado            EstadoPago @default(PENDIENTE)
+  fecha             DateTime   @default(now())
+  observaciones     String?
+  registradoPorId   String?
+  creadoEn          DateTime   @default(now())
+  actualizadoEn     DateTime   @updatedAt
 
   paciente        Paciente         @relation(fields: [pacienteId], references: [id])
   turno           Turno?           @relation(fields: [turnoId], references: [id])
@@ -290,10 +307,10 @@ model AuditLog {
   id         String          @id @default(cuid())
   usuarioId  String?
   accion     AccionAuditoria
-  entidad    String          // p. ej. "Paciente", "Turno", "ConsultaClinica"
+  entidad    String // p. ej. "Paciente", "Turno", "ConsultaClinica"
   registroId String
-  previo     Json?           // Información anterior (cuando corresponde)
-  nuevo      Json?           // Información nueva (cuando corresponde)
+  previo     Json? // Información anterior (cuando corresponde)
+  nuevo      Json? // Información nueva (cuando corresponde)
   ip         String?
   creadoEn   DateTime        @default(now())
 
