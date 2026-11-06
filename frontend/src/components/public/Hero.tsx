@@ -1,165 +1,153 @@
-import { CalendarCheck, Clock3, MapPin, Megaphone, MessagesSquare, ShieldCheck } from 'lucide-react'
-import { datosDemo, horariosAtencion, obrasSociales, perfilMedico } from '@/data/mock'
+import { CalendarCheck, Clock3, MapPin, Phone, Stethoscope } from 'lucide-react'
+import { consultorio, contacto, perfilMedico } from '@/data/sitio'
 
-/** Botón flotante de WhatsApp con número de ejemplo. */
+/** Botón flotante de WhatsApp del consultorio. */
 export function FloatingWhatsApp() {
   return (
     <a
-      href={datosDemo.whatsapp}
+      href={contacto.whatsappUrl}
       target="_blank"
       rel="noreferrer"
-      className="fixed right-4 bottom-4 z-40 inline-flex h-12 items-center gap-2 rounded-full bg-emerald-500 px-4 text-sm font-semibold text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-600 sm:right-6 sm:bottom-6"
+      aria-label="Contacto por WhatsApp"
+      className="fixed right-4 bottom-4 z-40 inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-600/25 transition hover:-translate-y-0.5 hover:bg-emerald-600 sm:right-6 sm:bottom-6 sm:h-12 sm:w-auto sm:px-4"
     >
-      <MessagesSquare className="h-5 w-5" aria-hidden="true" />
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
+        <path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.9-1.4A10 10 0 1 0 12 2Zm5.1 13.9c-.2.6-1.2 1.2-1.7 1.2-.4.1-1 .1-1.6-.1-2.6-.9-4.3-3.5-4.4-3.7-.1-.2-1-1.4-1-2.6 0-1.2.6-1.8.9-2 .2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.6.7 2 .8 2.1.1.2.1.3 0 .5-.1.2-.2.4-.3.5l-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1.2-.2.7-.8.9-1.1.2-.3.4-.2.6-.1l1.8.9c.2.1.4.2.4.3.1.1 0 .7-.2.9Z" />
+      </svg>
       <span className="hidden sm:inline">WhatsApp</span>
     </a>
   )
 }
 
-export function Hero() {
-  const franjas = horariosAtencion.filter((h) => h.franja !== 'Sin atención')
+/** Línea electrocardiográfica decorativa del panel visual. */
+function LineaEcg() {
+  return (
+    <svg
+      viewBox="0 0 320 80"
+      fill="none"
+      preserveAspectRatio="none"
+      className="absolute inset-x-0 top-1/2 h-20 w-full -translate-y-1/2 text-accent-400/50"
+      aria-hidden="true"
+    >
+      <polyline
+        points="0 40 90 40 108 40 118 12 130 66 142 40 190 40 206 40 216 20 228 58 240 40 320 40"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
+/** Portada principal del consultorio. */
+export function Hero() {
   return (
     <section className="relative overflow-hidden bg-primary-950 text-white">
-      {/* Capas decorativas: rejilla + halos de luz */}
+      {/* Capas decorativas: rejilla + halos de luz suaves */}
       <div className="hero-grid absolute inset-0" aria-hidden="true" />
       <div
-        className="absolute -top-32 left-1/2 h-96 w-3/4 -translate-x-1/2 rounded-full bg-accent-500/15 blur-3xl"
+        className="absolute -top-28 left-1/2 h-72 w-3/4 -translate-x-1/2 rounded-full bg-accent-500/15 blur-3xl"
         aria-hidden="true"
       />
       <div
-        className="absolute -bottom-40 -left-24 h-80 w-80 rounded-full bg-primary-500/20 blur-3xl"
+        className="absolute -bottom-32 -left-24 h-64 w-64 rounded-full bg-primary-500/20 blur-3xl"
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-        <div className="grid items-center gap-12 lg:grid-cols-[1.15fr_0.85fr]">
-          {/* Columna de texto */}
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-accent-200 backdrop-blur">
-              <span className="relative flex h-2 w-2" aria-hidden="true">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+      <div className="relative mx-auto grid max-w-6xl gap-8 px-4 pb-12 pt-10 sm:px-6 sm:pb-16 sm:pt-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-14 lg:pb-20 lg:pt-24">
+        {/* Columna de texto (primera en móvil) */}
+        <div className="min-w-0">
+          <p className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-[11px] font-medium text-accent-200 backdrop-blur sm:text-xs">
+            <span className="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+            </span>
+            Atención por orden de inscripción
+          </p>
+
+          <h1 className="mt-4 text-4xl font-extrabold leading-[1.06] tracking-tight text-balance sm:mt-5 sm:text-5xl lg:text-6xl">
+            {perfilMedico.nombre}
+          </h1>
+          <p className="mt-2.5 text-base font-semibold text-accent-300 sm:mt-3 sm:text-lg">
+            Medicina clínica
+          </p>
+
+          <p className="mt-4 text-sm leading-relaxed text-primary-100/85 sm:mt-5 sm:text-lg">
+            {perfilMedico.descripcion}
+          </p>
+
+          {/* Recuadro: horario y ubicación */}
+          <div className="mt-6 flex w-full flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur sm:w-fit sm:min-w-md sm:p-5">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
+                <Clock3 className="h-4.5 w-4.5 text-accent-300" aria-hidden="true" />
               </span>
-              Atención por orden de inscripción — consultorio clínica general
-            </p>
-
-            <h1 className="mt-6 text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl lg:text-6xl">
-              {perfilMedico.nombre}
-            </h1>
-            <p className="mt-3 bg-gradient-to-r from-accent-300 to-accent-400 bg-clip-text text-xl font-bold text-transparent sm:text-2xl">
-              {perfilMedico.especialidad}
-            </p>
-
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-primary-100/85 sm:text-lg">
-              {perfilMedico.descripcion}
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href={datosDemo.whatsapp}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-primary-950 shadow-lg shadow-accent-500/10 transition hover:-translate-y-0.5 hover:bg-accent-100"
-              >
-                <CalendarCheck className="h-4.5 w-4.5" aria-hidden="true" />
-                Solicitar turno
-              </a>
-              <a
-                href="#horarios"
-                className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                <Clock3 className="h-4.5 w-4.5" aria-hidden="true" />
-                Ver horarios
-              </a>
+              <span className="min-w-0 flex-1 text-sm text-primary-100/90 sm:text-base">
+                <strong className="font-semibold text-white">Lunes a Jueves</strong>
+                <span className="mx-1.5 text-white/40">·</span>
+                <span className="numeros-tabulares">desde las 17:00</span>
+              </span>
             </div>
-
-            {/* Panel de confianza */}
-            <div className="mt-9 max-w-xl rounded-3xl border border-white/10 bg-white/5 p-4 shadow-lg shadow-black/20 backdrop-blur sm:p-5">
-              <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:divide-x sm:divide-white/10 sm:gap-0">
-                <div className="flex items-start gap-3 sm:pr-5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
-                    <Clock3 className="h-4.5 w-4.5 text-accent-300" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
-                      Franjas de atención
-                    </dt>
-                    <dd className="numeros-tabulares mt-1 text-xs leading-snug font-semibold text-white">
-                      {franjas.map((f) => f.franja).join(' · ')}
-                    </dd>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 sm:px-5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
-                    <ShieldCheck className="h-4.5 w-4.5 text-accent-300" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
-                      Coberturas
-                    </dt>
-                    <dd className="mt-1 text-sm font-semibold text-white">
-                      {obrasSociales.length} obras y prepagas
-                    </dd>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 sm:pl-5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
-                    <MapPin className="h-4.5 w-4.5 text-accent-300" aria-hidden="true" />
-                  </span>
-                  <div className="min-w-0">
-                    <dt className="text-[10px] font-semibold uppercase tracking-wider text-white/50">
-                      Ubicación
-                    </dt>
-                    <dd className="mt-1 truncate text-sm font-semibold text-white">
-                      {datosDemo.consultorio.ciudad}
-                    </dd>
-                  </div>
-                </div>
-              </dl>
-            </div>
+            <div className="h-px bg-white/10" aria-hidden="true" />
+            <a
+              href={consultorio.mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex items-center gap-3"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
+                <MapPin className="h-4.5 w-4.5 text-accent-300" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1 text-sm text-primary-100/90 sm:text-base">
+                <strong className="font-semibold text-white">Aguilares, Tucumán</strong>
+                <span className="mx-1.5 text-white/40">·</span>
+                <span className="font-medium text-accent-200 underline underline-offset-4 transition group-hover:text-accent-100">
+                  Ver en Google Maps
+                </span>
+              </span>
+            </a>
           </div>
 
-          {/* Columna de presentación */}
-          <div className="relative mx-auto w-full max-w-xs md:max-w-sm">
+          {/* Acciones: a ancho completo en móvil, cómodas al pulgar */}
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <a
+              href="#contacto"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-primary-950 shadow-lg shadow-accent-500/10 transition hover:-translate-y-0.5 hover:bg-accent-100 sm:w-auto"
+            >
+              <CalendarCheck className="h-4.5 w-4.5" aria-hidden="true" />
+              Solicitar atención
+            </a>
+            <a
+              href={contacto.telUrl}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
+            >
+              <Phone className="h-4.5 w-4.5" aria-hidden="true" />
+              <span className="numeros-tabulares">{contacto.telefonoVisible}</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Panel visual: sobrio, con glifo médico y línea ECG */}
+        <div className="relative mx-auto w-full max-w-xs sm:max-w-sm lg:max-w-none">
+          <div
+            className="absolute -inset-4 rounded-[2.5rem] bg-accent-400/10 blur-2xl"
+            aria-hidden="true"
+          />
+          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary-900/80 to-primary-950 shadow-2xl shadow-black/30 sm:aspect-[16/10] lg:aspect-[4/3]">
+            <div className="hero-grid absolute inset-0" aria-hidden="true" />
             <div
-              className="absolute -inset-6 rounded-[2.5rem] bg-accent-400/15 blur-2xl"
+              className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-accent-400/15 blur-3xl"
               aria-hidden="true"
             />
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-black/30 backdrop-blur">
-              <div
-                className="hero-grid flex aspect-4/5 items-center justify-center bg-gradient-to-br from-primary-800/80 to-primary-950"
-                aria-hidden="true"
-              >
-                <span className="text-8xl font-extrabold tracking-tight text-accent-200/90">LP</span>
-              </div>
-              <div className="border-t border-white/10 bg-white/5 px-5 py-4">
-                <p className="text-sm font-semibold text-white">{perfilMedico.especialidad}</p>
-                <p className="mt-0.5 text-xs text-accent-200/70">Matrícula {perfilMedico.matricula}</p>
-                <p className="mt-2 text-[11px] leading-relaxed text-white/40">
-                  Fotografía provisoria — se reemplazará por la real al administrar el sitio.
-                </p>
-              </div>
-            </div>
-
-            {/* Tarjeta flotante: próxima atención */}
-            <div className="absolute -left-4 top-10 hidden rounded-2xl border border-white/10 bg-primary-900/90 px-4 py-3 shadow-xl backdrop-blur sm:block">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-accent-200/80">
-                Próximos horarios de ejemplo
-              </p>
-              <p className="numeros-tabulares mt-1 text-sm font-bold text-white">
-                09:00 · 16:00 · 09:00
-              </p>
-            </div>
-
-            {/* Tarjeta flotante: turnos por WhatsApp */}
-            <div className="absolute -right-3 bottom-24 hidden rounded-2xl border border-white/10 bg-white px-4 py-3 shadow-xl sm:block">
-              <p className="flex items-center gap-1.5 text-xs font-bold text-primary-900">
-                <MessagesSquare className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
-                Turnos por WhatsApp
-              </p>
-              <p className="mt-0.5 text-[11px] text-slate-500">(número de ejemplo)</p>
-            </div>
+            <div
+              className="absolute -bottom-16 -left-16 h-44 w-44 rounded-full bg-primary-500/25 blur-3xl"
+              aria-hidden="true"
+            />
+            <LineaEcg />
+            <span className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 ring-1 ring-white/15 backdrop-blur sm:h-24 sm:w-24">
+              <Stethoscope className="h-9 w-9 text-accent-200 sm:h-11 sm:w-11" aria-hidden="true" />
+            </span>
           </div>
         </div>
       </div>
@@ -175,36 +163,5 @@ export function Hero() {
         <path d="M0 48h1440V0c-240 32-720 40-1440 12v36Z" fill="currentColor" />
       </svg>
     </section>
-  )
-}
-
-export function AvisoImportante() {
-  // En la etapa 2 los avisos se obtienen de la API (tabla Aviso).
-  const avisos = [
-    {
-      id: 'ejemplo-1',
-      titulo: 'Atención suspendida por vacaciones',
-      mensaje:
-        'Del 10 al 24 de enero no habrá atención. Consultá novedades por WhatsApp. (aviso de ejemplo)',
-    },
-  ]
-  if (avisos.length === 0) return null
-
-  return (
-    <div id="avisos" className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-8">
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-card sm:p-5">
-        <div className="flex gap-3">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
-            <Megaphone className="h-4 w-4 text-amber-600" aria-hidden="true" />
-          </div>
-          {avisos.map((a) => (
-            <div key={a.id}>
-              <h2 className="text-sm font-semibold text-amber-800">{a.titulo}</h2>
-              <p className="mt-0.5 text-sm text-amber-800/90">{a.mensaje}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
   )
 }

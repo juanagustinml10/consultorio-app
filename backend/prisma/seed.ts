@@ -12,12 +12,12 @@ async function main() {
   const hashMedico = await hash(CONTRASENA_DEMO)
   const medico = await prisma.usuario.upsert({
     where: { email: 'medico@demo.com' },
-    update: { contrasenaHash: hashMedico, nombre: 'Laura', apellido: 'Pérez', activo: true },
+    update: { contrasenaHash: hashMedico, nombre: 'Gustavo', apellido: 'Puertas', activo: true },
     create: {
       email: 'medico@demo.com',
       contrasenaHash: hashMedico,
-      nombre: 'Laura',
-      apellido: 'Pérez',
+      nombre: 'Gustavo',
+      apellido: 'Puertas',
       rol: 'MEDICO',
     },
   })
@@ -96,6 +96,7 @@ async function main() {
         data: {
           pacienteId: pacientes[t.dni],
           fechaHora: esHoy(t.h, t.m),
+          fechaAtencion: esHoy(t.h, t.m), // Requerido por la migración turnos_sin_horario
           duracionMin: 30,
           motivo: t.motivo,
           estado: t.estado,

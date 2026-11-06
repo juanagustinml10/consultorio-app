@@ -1,11 +1,9 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarPlus, HeartPulse, Menu, X } from 'lucide-react'
 
 const LINKS = [
   { href: '#perfil', label: 'Perfil' },
-  { href: '#formacion', label: 'Formación' },
-  { href: '#servicios', label: 'Servicios' },
   { href: '#horarios', label: 'Horarios' },
   { href: '#obras-sociales', label: 'Obras sociales' },
   { href: '#ubicacion', label: 'Ubicación' },
@@ -24,9 +22,9 @@ export function SiteHeader() {
               <HeartPulse className="h-5 w-5 text-accent-300" aria-hidden="true" />
             </span>
             <span className="truncate text-sm font-bold text-primary-900 sm:text-base">
-              Dra. Laura Pérez
+              Dr. Gustavo Puertas
               <span className="block text-[11px] font-medium text-slate-500 sm:text-xs">
-                Medicina clínica
+                Consultorio médico
               </span>
             </span>
           </a>
@@ -46,7 +44,7 @@ export function SiteHeader() {
               className="ml-2 inline-flex items-center gap-1.5 rounded-xl bg-primary-900 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-primary-800"
             >
               <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              Solicitar turno
+              Solicitar atención
             </a>
           </nav>
 
@@ -81,7 +79,7 @@ export function SiteHeader() {
               className="mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-primary-900 px-4 py-3 text-sm font-semibold text-white"
             >
               <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              Solicitar turno
+              Solicitar atención
             </a>
             <Link
               to="/login"

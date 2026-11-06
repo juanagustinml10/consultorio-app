@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarCheck, ChevronDown, HeartPulse, Lock, MessagesSquare } from 'lucide-react'
-import { datosDemo, perfilMedico, preguntasFrecuentes } from '@/data/mock'
+import { consultorio, contacto, horariosAtencion, perfilMedico, preguntasFrecuentes } from '@/data/sitio'
 import { SeccionPublica } from './SeccionPublica'
 
 function FAQItem({ pregunta, respuesta }: { pregunta: string; respuesta: string }) {
@@ -42,7 +42,7 @@ export function SeccionFAQ() {
     <SeccionPublica
       id="faq"
       titulo="Preguntas frecuentes"
-      subtitulo="Respuestas a las consultas más habituales (contenido de ejemplo)."
+      subtitulo="Respuestas a las consultas más habituales."
       alternada
     >
       <div className="grid items-start gap-4 sm:grid-cols-2">
@@ -71,7 +71,7 @@ export function SiteFooter() {
   return (
     <footer className="relative overflow-hidden bg-primary-950 text-white">
       <div className="hero-grid absolute inset-0" aria-hidden="true" />
-      {/* Banda de turno rápido */}
+      {/* Banda de contacto rápido */}
       <div className="relative mx-auto max-w-6xl px-4 pt-10 sm:px-6 sm:pt-14">
         <div className="relative flex flex-col items-start justify-between gap-6 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-primary-900 to-primary-800 p-7 shadow-card-hover sm:flex-row sm:items-center sm:p-9">
           <span
@@ -79,13 +79,13 @@ export function SiteFooter() {
             aria-hidden="true"
           />
           <div className="relative">
-            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">¿Necesitás un turno?</h2>
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">¿Necesitás comunicarte?</h2>
             <p className="mt-1.5 max-w-md text-sm text-accent-100/80">
-              Escribinos por WhatsApp y reservamos tu consulta (datos de ejemplo, sin información real).
+              Escribinos por WhatsApp o inscribite en el consultorio cada tarde de lunes a jueves.
             </p>
           </div>
           <a
-            href={datosDemo.whatsapp}
+            href={contacto.whatsappUrl}
             target="_blank"
             rel="noreferrer"
             className="relative inline-flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-primary-950 transition hover:-translate-y-0.5 hover:bg-accent-100"
@@ -105,15 +105,30 @@ export function SiteFooter() {
               </span>
               <span className="font-bold">{perfilMedico.nombre}</span>
             </div>
-            <p className="mt-3 text-sm text-white/60">{perfilMedico.especialidad}</p>
-            <p className="mt-1 text-xs text-white/40">Matrícula {perfilMedico.matricula}</p>
+            <p className="mt-3 text-sm text-white/60">Consultorio médico</p>
+            <p className="mt-1 text-xs text-white/40">
+              {horariosAtencion[0]?.dias}, {horariosAtencion[0]?.franja}
+            </p>
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white/80">Contacto</h3>
             <ul className="mt-3.5 space-y-2 text-sm text-white/60">
-              <li>{datosDemo.contacto.telefono}</li>
-              <li>{datosDemo.contacto.email}</li>
-              <li>{datosDemo.consultorio.direccion}</li>
+              <li>
+                <a href={contacto.telUrl} className="numeros-tabulares transition hover:text-accent-300">
+                  {contacto.telefonoVisible}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={contacto.whatsappUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition hover:text-accent-300"
+                >
+                  WhatsApp
+                </a>
+              </li>
+              <li>{consultorio.direccionCompleta}</li>
             </ul>
           </div>
           <div>
@@ -126,7 +141,7 @@ export function SiteFooter() {
               </li>
               <li>
                 <a href="#contacto" className="transition hover:text-accent-300">
-                  Solicitar turno
+                  Solicitar atención
                 </a>
               </li>
               <li>
@@ -141,10 +156,10 @@ export function SiteFooter() {
           </div>
         </div>
         <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
-          <p>© {ANIO} Consultorio Dra. Laura Pérez. Todos los derechos reservados. (sitio de ejemplo)</p>
+          <p>© {ANIO} Consultorio {perfilMedico.nombre}. Todos los derechos reservados.</p>
           <p className="inline-flex items-center gap-1.5">
             <CalendarCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            Demostración: datos ficticios, sin información real del profesional.
+            Atención de lunes a jueves desde las 17:00 hs.
           </p>
         </div>
       </div>

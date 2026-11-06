@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   Activity,
   BarChart3,
@@ -18,7 +18,8 @@ import { StatCard } from '@/components/dashboard/StatCard'
 import { Card } from '@/components/ui/Card'
 import { ListaInscripciones } from '@/components/inscripciones/ListaInscripciones'
 import { HistorialAtendidosPorJornada } from '@/components/inscripciones/HistorialAtendidosPorJornada'
-import { cambiarEstadoAtencion, getInscripciones, type TurnoApi } from '@/lib/api'
+import { SiguientePaciente } from '@/components/inscripciones/SiguientePaciente'
+import { ApiError, cambiarEstadoAtencion, getInscripciones, type TurnoApi } from '@/lib/api'
 import { mensajeDeError } from '@/pages/pacientes/errores'
 
 function hoyLocal(): string {
@@ -46,23 +47,53 @@ const SECCIONES: Array<{ id: SeccionPacientes; etiqueta: string }> = [
 
 export default function MedicoPanel() {
   const navigate = useNavigate()
+  const location = useLocation()
   const hoy = hoyLocal()
   const { usuario } = useAuth()
   const [fecha, setFecha] = useState(hoy)
   const [turnos, setTurnos] = useState<TurnoApi[]>([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [aviso, setAviso] = useState<string | null>(() => {
+    const estado = location.state as { aviso?: string } | null
+    return estado?.aviso ?? null
+  })
   const [procesandoId, setProcesandoId] = useState<string | null>(null)
   const [refresco, setRefresco] = useState(0)
   const [seccion, setSeccion] = useState<SeccionPacientes>('espera')
   const [busqueda, setBusqueda] = useState('')
+  const esperaPrevia = useRef<{ fecha: string; ids: Set<string> } | null>(null)
+
+  useEffect(() => {
+    if (!aviso) return
+    const temporizador = window.setTimeout(() => setAviso(null), 4000)
+    return () => window.clearTimeout(temporizador)
+  }, [aviso])
 
   useEffect(() => {
     let cancelado = false
     setError(null)
     getInscripciones({ fecha, incluirCancelados: true })
       .then(({ items }) => {
-        if (!cancelado) setTurnos(items)
+        if (cancelado) return
+        setTurnos(items)
+
+        // Aviso previo: detecta pacientes que se suman a la sala de espera
+        // entre actualizaciones automáticas de la misma jornada.
+        const enEsperaAhora = items.filter((turno) => turno.estado === 'EN_ESPERA')
+        const idsAhora = new Set(enEsperaAhora.map((turno) => turno.id))
+        const previo = esperaPrevia.current
+        if (previo && previo.fecha === fecha) {
+          const nuevos = enEsperaAhora.filter((turno) => !previo.ids.has(turno.id))
+          const recienLlegado = nuevos[nuevos.length - 1]
+          if (recienLlegado) {
+            setAviso(
+              `Nuevo paciente en espera: ${recienLlegado.paciente.apellido}, ${recienLlegado.paciente.nombre}` +
+                (nuevos.length > 1 ? ` (+${nuevos.length - 1} más)` : ''),
+            )
+          }
+        }
+        esperaPrevia.current = { fecha, ids: idsAhora }
       })
       .catch(() => {
         if (!cancelado) setError('No se pudieron cargar los pacientes del día.')
@@ -81,6 +112,14 @@ export default function MedicoPanel() {
   }, [])
 
   const enEspera = useMemo(() => turnos.filter((t) => t.estado === 'EN_ESPERA'), [turnos])
+  const siguiente = useMemo(
+    () =>
+      [...enEspera].sort(
+        (a, b) =>
+          (a.numeroOrdenDia ?? Number.MAX_SAFE_INTEGER) - (b.numeroOrdenDia ?? Number.MAX_SAFE_INTEGER),
+      )[0] ?? null,
+    [enEspera],
+  )
   const enAtencion = useMemo(() => turnos.filter((t) => t.estado === 'EN_ATENCION'), [turnos])
   const atendidos = useMemo(() => turnos.filter((t) => t.estado === 'ATENDIDO'), [turnos])
   const cancelados = useMemo(() => turnos.filter((t) => t.estado === 'CANCELADO'), [turnos])
@@ -114,7 +153,18 @@ export default function MedicoPanel() {
       }
       if (estado === 'ATENDIDO') setSeccion('atendidos')
     } catch (e) {
-      setError(mensajeDeError(e, 'No se pudo actualizar el estado de atención.'))
+      // Si faltó registrar la consulta clínica, derivar a la historia clínica
+      // donde se abre el formulario de la consulta en curso.
+      if (
+        estado === 'ATENDIDO' &&
+        e instanceof ApiError &&
+        e.status === 409 &&
+        e.message.startsWith('Registrá y guardá la consulta')
+      ) {
+        navigate(`/medico/pacientes/${turno.paciente.id}/historia?turnoId=${encodeURIComponent(turno.id)}`)
+      } else {
+        setError(mensajeDeError(e, 'No se pudo actualizar el estado de atención.'))
+      }
     } finally {
       setProcesandoId(null)
     }
@@ -154,11 +204,32 @@ export default function MedicoPanel() {
           </div>
         </div>
 
+        {aviso && (
+          <div
+            role="status"
+            className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-sm font-medium text-emerald-700"
+          >
+            <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
+            {aviso}
+          </div>
+        )}
+
         {error && (
           <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
             {error}
           </p>
         )}
+
+        <section aria-label="Aviso previo del siguiente paciente">
+          <SiguientePaciente
+            turno={siguiente}
+            totalEnEspera={enEspera.length}
+            esHoy={fecha === hoy}
+            basePacientes="/medico/pacientes"
+            procesandoId={procesandoId}
+            onIniciar={(turno) => void cambiarEstado(turno, 'EN_ATENCION')}
+          />
+        </section>
 
         <section aria-label="Resumen de pacientes del día" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatCard

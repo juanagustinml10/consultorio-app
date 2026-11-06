@@ -127,7 +127,17 @@ export default function HistoriaClinicaPage() {
   })
   const [guardandoConsulta, setGuardandoConsulta] = useState(false)
   const envioConsultaEnCurso = useRef(false)
+  const refFormularioConsulta = useRef<HTMLDivElement>(null)
   const [errorConsulta, setErrorConsulta] = useState<string | null>(null)
+
+  function desplazarAFormularioConsulta() {
+    // El formulario en modo atención se muestra incrustado al pie de la página;
+    // el scroll lleva al usuario hacia él al abrirse (auto o por clic).
+    if (!turnoId) return
+    window.setTimeout(() => {
+      refFormularioConsulta.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+  }
 
   // Estado para historial de versiones expandido por consulta
   const [versionesExpandidas, setVersionesExpandidas] = useState<Record<string, boolean>>({})
@@ -247,6 +257,7 @@ export default function HistoriaClinicaPage() {
         proximoControl: '',
       },
     })
+    desplazarAFormularioConsulta()
   }
 
   // Abrir modal para editar consulta
@@ -267,6 +278,7 @@ export default function HistoriaClinicaPage() {
         proximoControl: c.proximoControl ? c.proximoControl.slice(0, 10) : '',
       },
     })
+    desplazarAFormularioConsulta()
   }
 
   // Guardar consulta (crear o editar)
@@ -306,6 +318,20 @@ export default function HistoriaClinicaPage() {
             },
           }
         })
+
+        // En modo atención: guardar la consulta finaliza la atención y vuelve al panel.
+        if (turnoId && turnoAtencion) {
+          setModalConsulta((m) => ({ ...m, abierto: false }))
+          setErrorAtencion(null)
+          try {
+            await cambiarEstadoAtencion(turnoAtencion.id, 'ATENDIDO')
+            navigate('/medico', { state: { aviso: 'Consulta registrada y atención finalizada correctamente.' } })
+          } catch (errorFinalizar) {
+            setErrorAtencion(mensajeDeError(errorFinalizar, 'Se registró la consulta, pero no se pudo finalizar la atención. Finalizala desde el panel.'))
+          }
+          return
+        }
+
         mostrarAviso('Consulta médica registrada con éxito.')
       } else if (modalConsulta.consultaId) {
         const { consulta } = await editarConsulta(modalConsulta.consultaId, payload)
@@ -434,16 +460,25 @@ export default function HistoriaClinicaPage() {
                     ) : null}
                   </div>
                   {turnoAtencion && (
-                    <button
-                      type="button"
-                      disabled={finalizando || !idConsultaAtencion}
-                      onClick={() => void finalizarAtencion()}
-                      title={!idConsultaAtencion ? 'Guardá la consulta antes de finalizar' : undefined}
-                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {finalizando ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                      Finalizar atención
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <Link
+                        to={`${base}/${pacienteId}`}
+                        className="inline-flex items-center gap-2 rounded-xl border border-primary-200 bg-white px-4 py-2.5 text-sm font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
+                      >
+                        <User className="h-4 w-4" aria-hidden="true" />
+                        Ver ficha
+                      </Link>
+                      <button
+                        type="button"
+                        disabled={finalizando || !idConsultaAtencion}
+                        onClick={() => void finalizarAtencion()}
+                        title={!idConsultaAtencion ? 'Guardá la consulta antes de finalizar' : undefined}
+                        className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {finalizando ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                        Finalizar atención
+                      </button>
+                    </div>
                   )}
                 </div>
               </Card>
@@ -477,11 +512,13 @@ export default function HistoriaClinicaPage() {
                         if (turnoId && !modalConsulta.abierto && modalConsulta.modo === 'editar' && modalConsulta.consultaId === idConsultaAtencion) {
                           setErrorConsulta(null)
                           setModalConsulta((actual) => ({ ...actual, abierto: true }))
+                          desplazarAFormularioConsulta()
                         }
                         else if (consultaGuardada) abrirEditarConsulta(consultaGuardada)
                         else if (turnoId) {
                           setErrorConsulta(null)
                           setModalConsulta((actual) => ({ ...actual, abierto: true }))
+                          desplazarAFormularioConsulta()
                         }
                         else abrirNuevaConsulta()
                       }}
@@ -1060,8 +1097,8 @@ export default function HistoriaClinicaPage() {
 
         {/* Modal de Registro / Edición de Consulta */}
         {modalConsulta.abierto && (
-          <div className={turnoId
-            ? 'mx-auto mt-5 w-full max-w-5xl scroll-mt-5'
+          <div ref={refFormularioConsulta} className={turnoId
+            ? 'mx-auto mt-5 w-full max-w-5xl scroll-mt-20'
             : 'fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-primary-950/50 p-4 backdrop-blur-sm sm:items-center'}>
             <div className={`my-2 w-full rounded-2xl border border-primary-100 bg-white p-5 shadow-card sm:p-7 ${turnoId ? '' : 'max-w-2xl shadow-xl sm:my-8'}`}>
               <div className="flex items-center justify-between border-b border-primary-100 pb-3">
