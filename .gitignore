@@ -6,3 +6,7 @@ build/
 *.log
 .DS_Store
 Thumbs.db
+
+# Archivos locales de PostgreSQL
+/pg_hba_new.conf
+/restart_pg.ps1

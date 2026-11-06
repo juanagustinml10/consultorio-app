@@ -1,1 +1,0 @@
-Restart-Service -Name postgresql-x64-18 -Force
