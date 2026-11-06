@@ -44,6 +44,8 @@ function ErrorDeCampo({ mensaje }: { mensaje?: string }) {
 
 interface FormularioPacienteProps {
   modo: 'crear' | 'editar'
+  /** Variante compacta para el alta incrustada en el diálogo de inscripción. */
+  compact?: boolean
   valoresIniciales?: PacienteApi
   guardando: boolean
   errorApi: string | null
@@ -56,6 +58,7 @@ interface FormularioPacienteProps {
 
 export function FormularioPaciente({
   modo,
+  compact = false,
   valoresIniciales,
   guardando,
   errorApi,
@@ -117,9 +120,15 @@ export function FormularioPaciente({
   })
 
   const ocupando = guardando || isSubmitting
+  const claseInput = compact
+    ? 'mt-1 w-full rounded-lg border border-primary-100 bg-slate-50 px-3 py-2 text-sm text-primary-950 outline-none transition placeholder:text-slate-400 focus:border-accent-400 focus:ring-2 focus:ring-accent-200'
+    : CLASE_INPUT
+  const claseGrid = compact
+    ? 'mt-2 grid gap-3 sm:grid-cols-2'
+    : 'mt-3 grid gap-4 sm:grid-cols-2'
 
   return (
-    <form onSubmit={enviar} noValidate className="grid gap-5">
+    <form onSubmit={enviar} noValidate className={`grid ${compact ? 'gap-3' : 'gap-5'}`}>
       {errorApi && (
         <div
           role="alert"
@@ -135,7 +144,7 @@ export function FormularioPaciente({
         <h3 className="text-xs font-semibold uppercase tracking-wide text-primary-700">
           Datos personales
         </h3>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <div className={claseGrid}>
           <div>
             <label htmlFor="nombre" className="text-sm font-medium text-primary-900">
               Nombre <span className="text-rose-500">*</span>
@@ -145,7 +154,7 @@ export function FormularioPaciente({
               type="text"
               autoComplete="given-name"
               placeholder="Nombre"
-              className={CLASE_INPUT}
+              className={claseInput}
               {...register('nombre')}
               aria-invalid={!!errors.nombre}
             />
@@ -160,7 +169,7 @@ export function FormularioPaciente({
               type="text"
               autoComplete="family-name"
               placeholder="Apellido"
-              className={CLASE_INPUT}
+              className={claseInput}
               {...register('apellido')}
               aria-invalid={!!errors.apellido}
             />
@@ -176,7 +185,7 @@ export function FormularioPaciente({
               inputMode="numeric"
               autoComplete="off"
               placeholder="7 u 8 dígitos"
-              className={`${CLASE_INPUT} numeros-tabulares`}
+              className={`${claseInput} numeros-tabulares`}
               {...register('dni')}
               aria-invalid={!!errors.dni}
             />
@@ -189,7 +198,7 @@ export function FormularioPaciente({
             <input
               id="fechaNacimiento"
               type="date"
-              className={`${CLASE_INPUT} numeros-tabulares`}
+              className={`${claseInput} numeros-tabulares`}
               {...register('fechaNacimiento')}
             />
           </div>
@@ -197,7 +206,7 @@ export function FormularioPaciente({
             <label htmlFor="sexo" className="text-sm font-medium text-primary-900">
               Sexo
             </label>
-            <select id="sexo" className={CLASE_INPUT} {...register('sexo')}>
+            <select id="sexo" className={claseInput} {...register('sexo')}>
               <option value="">Sin especificar</option>
               <option value="MASCULINO">Masculino</option>
               <option value="FEMENINO">Femenino</option>
@@ -210,7 +219,7 @@ export function FormularioPaciente({
       {/* Contacto */}
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-primary-700">Contacto</h3>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <div className={claseGrid}>
           <div>
             <label htmlFor="telefono" className="text-sm font-medium text-primary-900">
               Teléfono
@@ -220,7 +229,7 @@ export function FormularioPaciente({
               type="tel"
               autoComplete="tel"
               placeholder="11 0000-0000"
-              className={`${CLASE_INPUT} numeros-tabulares`}
+              className={`${claseInput} numeros-tabulares`}
               {...register('telefono')}
               aria-invalid={!!errors.telefono}
             />
@@ -235,7 +244,7 @@ export function FormularioPaciente({
               type="email"
               autoComplete="email"
               placeholder="nombre@ejemplo.com"
-              className={CLASE_INPUT}
+              className={claseInput}
               {...register('email')}
               aria-invalid={!!errors.email}
             />
@@ -250,7 +259,7 @@ export function FormularioPaciente({
               type="text"
               autoComplete="street-address"
               placeholder="Calle, número, localidad"
-              className={CLASE_INPUT}
+              className={claseInput}
               {...register('direccion')}
               aria-invalid={!!errors.direccion}
             />
@@ -262,12 +271,12 @@ export function FormularioPaciente({
       {/* Cobertura */}
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-primary-700">Cobertura</h3>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+        <div className={claseGrid}>
           <div>
             <label htmlFor="obraSocial" className="text-sm font-medium text-primary-900">
               Obra social / prepaga
             </label>
-            <select id="obraSocial" className={CLASE_INPUT} {...register('obraSocialId')}>
+            <select id="obraSocial" className={claseInput} {...register('obraSocialId')}>
               <option value="">Sin cobertura</option>
               {obras.map((o) => (
                 <option key={o.id} value={o.id}>
@@ -289,7 +298,7 @@ export function FormularioPaciente({
               id="numeroAfiliado"
               type="text"
               placeholder="Solo si tiene cobertura"
-              className={`${CLASE_INPUT} numeros-tabulares`}
+              className={`${claseInput} numeros-tabulares`}
               {...register('numeroAfiliado')}
               aria-invalid={!!errors.numeroAfiliado}
             />
@@ -305,16 +314,16 @@ export function FormularioPaciente({
         </label>
         <textarea
           id="notas"
-          rows={3}
+          rows={compact ? 2 : 3}
           placeholder="Detalles administrativos, autorizaciones, preferencias de contacto…"
-          className={`${CLASE_INPUT} resize-none`}
+          className={`${claseInput} resize-none`}
           {...register('notas')}
           aria-invalid={!!errors.notas}
         />
         <ErrorDeCampo mensaje={errors.notas?.message} />
       </div>
 
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+      <div className={`flex flex-col-reverse sm:flex-row sm:justify-end ${compact ? 'gap-2' : 'gap-3'}`}>
         {onCancelar ? (
           <button
             type="button"

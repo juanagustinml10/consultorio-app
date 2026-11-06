@@ -175,20 +175,20 @@ export function InscripcionModal({ abierto, fechaInicial, onCerrar, onInscripto 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-primary-950/55 p-3 sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-primary-950/55 p-2 sm:p-4">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="titulo-inscripcion"
-        className="my-4 w-full max-w-2xl rounded-2xl bg-white shadow-xl sm:my-8"
+        className="my-auto flex max-h-[calc(100dvh-1rem)] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl sm:max-h-[calc(100dvh-2rem)]"
       >
-        <div className="flex items-start justify-between gap-3 border-b border-primary-100 px-5 py-4 sm:px-6">
+        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-primary-100 px-4 py-3 sm:px-5">
           <div>
-            <h2 id="titulo-inscripcion" className="flex items-center gap-2 text-lg font-bold text-primary-950">
-              <CalendarDays className="h-5 w-5 text-primary-600" aria-hidden="true" />
-              {turnoInscripto ? 'Inscripción confirmada' : 'Inscribir paciente'}
+            <h2 id="titulo-inscripcion" className="flex items-center gap-2 text-base font-bold text-primary-950 sm:text-lg">
+              {modoNuevo ? <UserPlus className="h-5 w-5 text-primary-600" aria-hidden="true" /> : <CalendarDays className="h-5 w-5 text-primary-600" aria-hidden="true" />}
+              {turnoInscripto ? 'Inscripción confirmada' : modoNuevo ? 'Registrar paciente nuevo' : 'Inscribir paciente'}
             </h2>
-            {!turnoInscripto && (
+            {!turnoInscripto && !modoNuevo && (
               <p className="mt-1 text-sm text-slate-500">
                 Elegí el día, buscá al paciente y confirmá. El número se asigna automáticamente.
               </p>
@@ -205,7 +205,7 @@ export function InscripcionModal({ abierto, fechaInicial, onCerrar, onInscripto 
         </div>
 
         {turnoInscripto ? (
-          <div className="px-5 py-8 text-center sm:px-8">
+          <div className="min-h-0 overflow-y-auto px-5 py-8 text-center sm:px-8">
             <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
               <CheckCircle2 className="h-8 w-8 text-emerald-600" aria-hidden="true" />
             </span>
@@ -239,8 +239,8 @@ export function InscripcionModal({ abierto, fechaInicial, onCerrar, onInscripto 
             </div>
           </div>
         ) : (
-          <div className="space-y-4 px-5 py-5 sm:px-6">
-            <div>
+          <div className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 sm:px-5 ${modoNuevo ? 'space-y-3 py-3' : 'space-y-4 py-5'}`}>
+            <div className={modoNuevo ? 'flex flex-wrap items-center justify-between gap-2 rounded-lg bg-primary-50 px-3 py-2' : ''}>
               <label htmlFor="inscripcionFecha" className="text-sm font-semibold text-primary-900">
                 Día de atención <span className="text-rose-500">*</span>
               </label>
@@ -250,15 +250,15 @@ export function InscripcionModal({ abierto, fechaInicial, onCerrar, onInscripto 
                 required
                 value={fecha}
                 onChange={(event) => setFecha(event.target.value)}
-                className={CLASE_INPUT}
+                className={modoNuevo ? 'rounded-lg border border-primary-100 bg-white px-2.5 py-1.5 text-sm text-primary-950 outline-none focus:border-accent-400 focus:ring-2 focus:ring-accent-200' : CLASE_INPUT}
               />
-              <p className="mt-1.5 text-xs capitalize text-slate-500">{fechaLinda(fecha)}</p>
+              <p className={`${modoNuevo ? 'w-full text-right' : 'mt-1.5'} text-xs capitalize text-slate-500`}>{fechaLinda(fecha)}</p>
             </div>
 
             {modoNuevo ? (
-              <div className="rounded-2xl border border-primary-100 bg-slate-50/60 p-4">
-                <div className="mb-3 flex items-center justify-between gap-2">
-                  <h3 className="text-sm font-bold text-primary-900">Registrar paciente nuevo</h3>
+              <div>
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <p className="text-xs text-slate-500">Completá los datos para registrarlo e inscribirlo.</p>
                   <button
                     type="button"
                     onClick={() => {
@@ -273,6 +273,7 @@ export function InscripcionModal({ abierto, fechaInicial, onCerrar, onInscripto 
                 </div>
                 <FormularioPaciente
                   modo="crear"
+                  compact
                   guardando={guardando}
                   errorApi={error}
                   volverA="#"
