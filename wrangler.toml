@@ -1,0 +1,8 @@
+# Cloudflare Pages — proyecto consultorio-app
+# Configuración para despliegue automático desde GitHub.
+# Static assets: frontend/dist (output de Vite)
+# Functions: functions/ (proxy inverso de la API)
+
+name = "consultorio-app"
+compatibility_date = "2026-11-07"
+pages_build_output_dir = "frontend/dist"
