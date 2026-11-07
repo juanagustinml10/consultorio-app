@@ -9,13 +9,7 @@
       "buildCommand": "npx prisma generate && npm run build",
       "functions": {
         "src/app.ts": {
-          "includeFiles": ["node_modules/.prisma/client/**", "backend/node_modules/.prisma/client/**"]
-        },
-        "src/app.js": {
-          "includeFiles": ["node_modules/.prisma/client/**", "backend/node_modules/.prisma/client/**"]
-        },
-        "dist/server.js": {
-          "includeFiles": ["node_modules/.prisma/client/**", "backend/node_modules/.prisma/client/**"]
+          "includeFiles": "node_modules/.prisma/client/**"
         }
       }
     },
@@ -53,7 +47,7 @@
       }
     },
     {
-      "source": "/(.*)",
+      "source": "(.*)",
       "destination": {
         "service": "frontend"
       }
