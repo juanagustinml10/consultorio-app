@@ -7,7 +7,10 @@
  * (credentials: 'include').
  */
 
-export const API_BASE = '/api/v1'
+const apiBaseConfigurada = import.meta.env.VITE_API_BASE_URL?.trim()
+export const API_BASE = apiBaseConfigurada
+  ? `${apiBaseConfigurada.replace(/\/$/, '')}/api/v1`
+  : 'https://consultorio-backend-eosin.vercel.app/api/v1'
 
 export class ApiError extends Error {
   readonly status: number
