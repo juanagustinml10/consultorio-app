@@ -3,7 +3,6 @@
  * El entrypoint (server.ts) lo importa dinámicamente: así un fallo al
  * cargar algún módulo/native puede reportarse por /health sin tumbar la función.
  */
-import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
@@ -17,20 +16,18 @@ import { historiasRouter } from './routes/historias'
 import { estadisticasRouter } from './routes/estadisticas'
 import { sitioRouter } from './routes/sitio'
 import { manejarError } from './middlewares/error'
+import { valorEntorno } from './lib/runtimeConfig'
 
 const app = express()
 const port = Number(process.env.PORT ?? 3001)
-const origenFrontend = process.env.CORS_ORIGIN ?? 'http://localhost:5173'
-
 // Vercel finaliza TLS en su proxy; confiar un salto recupera la IP real para
 // el rate limit y permite comparar el origen same-origin detrás del HTTPS proxy.
 if (process.env.VERCEL) app.set('trust proxy', 1)
 
 app.use(cors((req, callback) => {
   const origenMismoDominio = `${req.protocol}://${req.get('host')}`
-  const origenesPermitidos = process.env.VERCEL
-    ? [process.env.CORS_ORIGIN, origenMismoDominio].filter((origen): origen is string => Boolean(origen))
-    : [origenFrontend, origenMismoDominio]
+  const origenConfigurado = valorEntorno('CORS_ORIGIN') ?? 'http://localhost:5173'
+  const origenesPermitidos = [origenConfigurado, origenMismoDominio]
   callback(null, {
     origin: origenesPermitidos,
     credentials: true,

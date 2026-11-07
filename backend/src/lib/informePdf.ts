@@ -1,5 +1,32 @@
 import PDFDocument from 'pdfkit'
+import * as PDFKitModulo from 'pdfkit'
 import type { EstadisticasPeriodo } from './estadisticas'
+
+/**
+ * El build de PDFKit para Workers (navegador) no incluye las fuentes estándar:
+ * hay que registrar explícitamente los datos de las que usa el informe.
+ * El build de Node las registra solo, así que allí la función no hace nada.
+ */
+type PdfKitConRegistro = typeof PDFKitModulo & {
+  registerStdFonts?: (...fuentes: unknown[]) => void
+}
+
+let fuentesListas: Promise<void> | undefined
+
+async function asegurarFuentesEstandar(): Promise<void> {
+  const registrador = PDFKitModulo as PdfKitConRegistro
+  if (typeof registrador.registerStdFonts !== 'function') return
+
+  fuentesListas ??= (async () => {
+    const [helvetica, helveticaBold] = await Promise.all([
+      import('pdfkit/standard-fonts/Helvetica'),
+      import('pdfkit/standard-fonts/HelveticaBold'),
+    ])
+    registrador.registerStdFonts!(helvetica.default, helveticaBold.default)
+  })()
+
+  await fuentesListas
+}
 
 const COLOR = {
   primary: '#0c2444',
@@ -435,7 +462,9 @@ function dibujarPiesDePagina(doc: PDFKit.PDFDocument): void {
 }
 
 /** Genera el PDF en memoria (sin archivos temporales). */
-export function generarInformePdf(datos: EstadisticasPeriodo): Promise<Buffer> {
+export async function generarInformePdf(datos: EstadisticasPeriodo): Promise<Buffer> {
+  await asegurarFuentesEstandar()
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',

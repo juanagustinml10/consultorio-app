@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "consultorio-app-api",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-11-07",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+
+  // PDFKit (build browser) evalúa `new URL("./data/...", import.meta.url)` al
+  // cargarse. En el bundle de Workers `import.meta.url` no está disponible y
+  // el módulo fallaría al iniciar. La ruta sólo se usa para PDF/A, que no
+  // generamos; con un valor válido el módulo carga sin tocar archivos.
+  "define": {
+    "import.meta.url": "\"file:///bundle/worker.js\""
+  }
+
+  // Hyperdrive (recomendado para producción):
+  // 1. Crear la configuración en el panel de Cloudflare o con:
+  //      npx wrangler hyperdrive create consultorio-db \
+  //        --connection-string="postgresql://..."
+  // 2. Reemplazar el marcador por el id devuelto por el comando.
+  // 3. Descomentar este bloque y desplegar.
+  //
+  // "hyperdrive": [
+  //   {
+  //     "binding": "HYPERDRIVE",
+  //     "id": "<ID_DE_HYPERDRIVE>"
+  //   }
+  // ]
+}

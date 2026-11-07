@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import { prisma } from './prisma'
+import { valorEntorno } from './runtimeConfig'
 
 const MAX_INTENTOS = 5
 const LIMPIAR_CADA_INTENTOS = 128
@@ -18,7 +19,7 @@ let intentosDesdeLimpieza = 0
 function hashClave(clave: string): string {
   // El secreto dedicado permite rotar credenciales de PostgreSQL sin reiniciar los límites.
   // DATABASE_URL mantiene el desarrollo funcional si no se definió el secreto opcional.
-  const secreto = process.env.LOGIN_RATE_LIMIT_SECRET || process.env.DATABASE_URL
+  const secreto = valorEntorno('LOGIN_RATE_LIMIT_SECRET') || valorEntorno('DATABASE_URL')
   if (!secreto) throw new Error('Falta configurar DATABASE_URL para el límite de intentos de login')
   return crypto.createHmac('sha256', secreto).update(clave).digest('hex')
 }

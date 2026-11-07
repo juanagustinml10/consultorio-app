@@ -6,6 +6,7 @@ import { registrarAccion } from '../lib/audit'
 import { reservarIntento, finalizarIntento, limpiarIntentos, claveDe } from '../lib/limiter'
 import { loginSchema } from '../validations'
 import type { SolicitudConSesion } from '../middlewares/auth'
+import { valorEntorno } from '../lib/runtimeConfig'
 
 // Datos del usuario que se pueden exponer (nunca hash ni tokens).
 const DATOS_USUARIO = {
@@ -23,7 +24,7 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   const datos = loginSchema.parse(req.body)
   const clave = claveDe(req.ip, datos.email)
 
-  if (process.env.NODE_ENV !== 'production' && req.headers['x-reset-limiter'] === 'true') {
+  if (valorEntorno('NODE_ENV') !== 'production' && req.headers['x-reset-limiter'] === 'true') {
     await limpiarIntentos(clave)
   }
 
