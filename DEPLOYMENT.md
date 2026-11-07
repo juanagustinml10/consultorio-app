@@ -1,29 +1,33 @@
 # Despliegue en Vercel y Supabase
 
-## Vercel Multi-Service Project
+## Estructura de Vercel
 
-Importar el repositorio con la raíz del proyecto y seleccionar **Services** como framework del proyecto. `vercel.json` define dos servicios: `backend` (Express, `backend/`) y `frontend` (Vite, `frontend/`). Las rutas `/api/*`, `/api` y `/health` van al backend; el resto va al frontend. El rewrite interno del frontend entrega `index.html` para las rutas de React Router.
+Desplegar el repositorio como **un único proyecto Vercel** con raíz `.`. No usar Vercel Multi-Service. La configuración de `vercel.json` instala los dos workspaces, genera Prisma Client, compila backend y frontend, publica `frontend/dist` y crea una Function Node.js para `/api/*`. El paquete raíz fija Node.js 22.x.
 
-Vercel Services figura actualmente como Beta. Confirmar que esté habilitado para el equipo antes de crear el proyecto.
+En Settings → Build and Deployment verificar:
+
+- Root Directory: `.`
+- Node.js Version: `22.x`
+- No activar una instalación independiente para `frontend/` o `backend/`.
+
+`/health` se reescribe a la Function `/api/health`. El frontend usa rutas same-origin `/api/v1/...`, por lo que no necesita una URL de backend aparte.
 
 ## Variables de entorno
 
-Configurar en **Vercel → Project → Settings → Environment Variables** para Production y Preview:
+Configurar en Vercel para Production y Preview:
 
-- `DATABASE_URL`: cadena de Supabase **Transaction pooler**, puerto `6543`, con `sslmode=require`, `pgbouncer=true` y `connection_limit=1`. Es la conexión de runtime de Prisma para las funciones serverless.
-- `DIRECT_URL`: cadena directa de Supabase para Prisma CLI y migraciones. Si el entorno que ejecuta migraciones no tiene IPv6, usar la cadena **Session pooler**, puerto `5432`, en vez de la conexión directa. No apuntar esta variable al pooler transaccional.
-- `LOGIN_RATE_LIMIT_SECRET`: opcional pero recomendado; secreto aleatorio estable de al menos 32 bytes para el HMAC del identificador del rate limit. Si no se define, el backend usa `DATABASE_URL` como clave HMAC. No usar una clave distinta entre Preview/Production sin necesidad; rotarla invalida los hashes previos, que caducan y se limpian con el tiempo.
-- `SESION_HORAS`: opcional, por defecto `8`.
-- `CORS_ORIGIN`: opcional. Las solicitudes same-origin se permiten automáticamente; si se usa otro origen web, declarar aquí su origen exacto (`https://...`).
+- `DATABASE_URL`: conexión de runtime a PostgreSQL Supabase. Preferir Transaction Pooler, puerto `6543`, con SSL requerido y `connection_limit=1` para funciones serverless.
+- `DIRECT_URL`: conexión directa o Session Pooler de Supabase para tareas de Prisma que necesitan conexión directa. No usar Transaction Pooler aquí.
+- `LOGIN_RATE_LIMIT_SECRET`: recomendado; secreto aleatorio estable de al menos 32 bytes. No compartirlo ni subirlo a Git.
+- `SESION_HORAS`: opcional; duración de sesión, por defecto `8`.
+- `CORS_ORIGIN`: solo si el navegador usa un origen distinto al dominio de la API. Para frontend y API en el mismo proyecto no hace falta.
 
-En local, `DATABASE_URL` sigue apuntando a PostgreSQL local y `DIRECT_URL` puede usar la misma cadena. No guardar cadenas con credenciales en Git. La plantilla está en `backend/.env.example`.
+No guardar `.env` en el repositorio. Las variables del navegador no deben contener credenciales de Supabase.
 
-## Supabase y Prisma
+## Migraciones
 
-Crear un proyecto PostgreSQL en Supabase y copiar las cadenas desde **Connect**. La app no usa credenciales Supabase desde el navegador: Prisma conecta desde el backend. Revisar y aplicar las migraciones existentes desde un entorno controlado con `DIRECT_URL`, incluido `20261106140000_limite_intentos_login_compartido`. Este repositorio no aplica migraciones automáticamente durante el despliegue.
+El build ejecuta `prisma generate`, pero no aplica migraciones. No ejecutar `migrate reset` ni `db push` contra la base con datos. La migración `20261106140000_limite_intentos_login_compartido` agrega la tabla usada por el limitador de intentos de login; el inicio de sesión requiere que esté aplicada en Supabase. Verificar el estado y aplicar las migraciones pendientes de forma controlada con `prisma migrate deploy` desde un entorno que tenga `DIRECT_URL`. No se ejecutó ninguna migración contra Supabase durante esta intervención.
 
-La tabla `intentos_limite_login` conserva solo un HMAC del par IP/correo, el inicio de ventana, fallos y reservas activas. La migración debe aplicarse antes de habilitar la nueva versión del backend; hasta entonces, la nueva versión responderá con error al login porque el rate limit falla de forma cerrada.
+## Validación posterior al despliegue
 
-## Validación del despliegue
-
-La configuración del repositorio prepara el build, pero no crea el proyecto de Vercel, no configura variables remotas y no ejecuta migraciones. Antes de producción, validar el Preview de Vercel, login, cookies `Secure`/`HttpOnly`/`SameSite=Lax`, lecturas/escrituras con Supabase y las rutas profundas de React Router.
+Después de desplegar, comprobar `https://<dominio>/health` (debe responder `estado: ok` y `db: conectada`), luego probar inicio/cierre de sesión, cookies `Secure`/`HttpOnly`/`SameSite=Lax`, rutas de pacientes, turnos e historias clínicas y navegación directa a rutas de React Router.
