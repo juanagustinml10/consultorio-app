@@ -24,7 +24,14 @@ type SameSiteCookie = 'lax' | 'strict' | 'none'
  */
 function sameSiteConfigurado(): SameSiteCookie {
   const valor = (valorEntorno('COOKIE_SAMESITE') ?? '').toLowerCase()
-  return valor === 'none' || valor === 'strict' || valor === 'lax' ? valor : 'lax'
+  if (valor === 'none' || valor === 'strict' || valor === 'lax') return valor
+  // En producción (Vercel, HTTPS), forzar 'none' para permitir cookies
+  // cross-origin en solicitudes fetch desde Cloudflare Pages.
+  // SameSite=None requiere Secure, que ya está activo en entornos de producción.
+  if (valorEntorno('NODE_ENV') === 'production' || Boolean(valorEntorno('VERCEL'))) {
+    return 'none'
+  }
+  return 'lax'
 }
 
 function esHttps(req: Request): boolean {
