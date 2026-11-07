@@ -10,6 +10,12 @@
       "functions": {
         "src/app.ts": {
           "includeFiles": "node_modules/.prisma/client/**"
+        },
+        "src/app.js": {
+          "includeFiles": "node_modules/.prisma/client/**"
+        },
+        "dist/server.js": {
+          "includeFiles": "node_modules/.prisma/client/**"
         }
       }
     },
