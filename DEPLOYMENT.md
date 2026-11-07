@@ -2,15 +2,9 @@
 
 ## Estructura de Vercel
 
-Desplegar el repositorio como **un único proyecto Vercel** con raíz `.`. No usar Vercel Multi-Service. La configuración de `vercel.json` instala los dos workspaces, genera Prisma Client, compila backend y frontend, publica `frontend/dist` y crea una Function Node.js para `/api/*`. El paquete raíz fija Node.js 22.x.
+Este repositorio usa **Vercel Multi-Service** dentro de un proyecto: `backend` ejecuta Express desde `backend/src/server.ts` y `frontend` publica `frontend/dist`. `vercel.json` enruta `/api/*` y `/health` al backend; las demás rutas van al frontend y sus rutas de React Router reciben `index.html`.
 
-En Settings → Build and Deployment verificar:
-
-- Root Directory: `.`
-- Node.js Version: `22.x`
-- No activar una instalación independiente para `frontend/` o `backend/`.
-
-`/health` se reescribe a la Function `/api/health`. El frontend usa rutas same-origin `/api/v1/...`, por lo que no necesita una URL de backend aparte.
+El paquete raíz y el backend fijan Node.js 22.x para el build y la Function. Cada servicio instala desde el lockfile correspondiente y el backend ejecuta `prisma generate` antes de compilar.
 
 ## Variables de entorno
 
@@ -20,14 +14,14 @@ Configurar en Vercel para Production y Preview:
 - `DIRECT_URL`: conexión directa o Session Pooler de Supabase para tareas de Prisma que necesitan conexión directa. No usar Transaction Pooler aquí.
 - `LOGIN_RATE_LIMIT_SECRET`: recomendado; secreto aleatorio estable de al menos 32 bytes. No compartirlo ni subirlo a Git.
 - `SESION_HORAS`: opcional; duración de sesión, por defecto `8`.
-- `CORS_ORIGIN`: solo si el navegador usa un origen distinto al dominio de la API. Para frontend y API en el mismo proyecto no hace falta.
+- `CORS_ORIGIN`: solo si el navegador usa un origen distinto al dominio de la API. Para frontend y API en el mismo dominio no hace falta.
 
 No guardar `.env` en el repositorio. Las variables del navegador no deben contener credenciales de Supabase.
 
 ## Migraciones
 
-El build ejecuta `prisma generate`, pero no aplica migraciones. No ejecutar `migrate reset` ni `db push` contra la base con datos. La migración `20261106140000_limite_intentos_login_compartido` agrega la tabla usada por el limitador de intentos de login; el inicio de sesión requiere que esté aplicada en Supabase. Verificar el estado y aplicar las migraciones pendientes de forma controlada con `prisma migrate deploy` desde un entorno que tenga `DIRECT_URL`. No se ejecutó ninguna migración contra Supabase durante esta intervención.
+El build ejecuta `prisma generate`, pero no aplica migraciones. No ejecutar `migrate reset` ni `db push` contra la base con datos. El estado de Supabase se verificó con `prisma migrate status`: las seis migraciones están aplicadas. No se ejecutó ninguna migración durante esta intervención.
 
 ## Validación posterior al despliegue
 
-Después de desplegar, comprobar `https://<dominio>/health` (debe responder `estado: ok` y `db: conectada`), luego probar inicio/cierre de sesión, cookies `Secure`/`HttpOnly`/`SameSite=Lax`, rutas de pacientes, turnos e historias clínicas y navegación directa a rutas de React Router.
+Comprobar `https://<dominio>/health` (debe responder `estado: ok` y `db: conectada`), luego probar inicio/cierre de sesión, cookies `Secure`/`HttpOnly`/`SameSite=Lax`, rutas de pacientes, turnos e historias clínicas y navegación directa a rutas de React Router.
