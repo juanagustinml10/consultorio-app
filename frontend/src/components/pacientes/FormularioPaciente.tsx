@@ -95,7 +95,7 @@ export function FormularioPaciente({
       telefono: valoresIniciales?.telefono ?? '',
       email: valoresIniciales?.email ?? '',
       direccion: valoresIniciales?.direccion ?? '',
-      obraSocialId: valoresIniciales?.obraSocial ?? valoresIniciales?.obraSocialId ?? '',
+      obraSocialId: valoresIniciales?.obraSocialId ?? '',
       numeroAfiliado: valoresIniciales?.numeroAfiliado ?? '',
       notas: valoresIniciales?.notas ?? '',
     },
@@ -276,26 +276,19 @@ export function FormularioPaciente({
             <label htmlFor="obraSocial" className="text-sm font-medium text-primary-900">
               Obra social / prepaga
             </label>
-            <input
-              id="obraSocial"
-              list="obras-lista"
-              className={claseInput}
-              {...register('obraSocialId')}
-              placeholder="Seleccioná o escribí la obra social"
-            />
-            <datalist id="obras-lista">
+            <select id="obraSocial" className={claseInput} {...register('obraSocialId')}>
+              <option value="">Sin cobertura</option>
               {obras.map((o) => (
-                <option key={o.id} value={o.nombre}>{o.nombre}</option>
+                <option key={o.id} value={o.id}>
+                  {o.nombre}
+                </option>
               ))}
-            </datalist>
+            </select>
             {obrasError && (
               <p className="mt-1.5 text-xs text-amber-600">
                 No se pudo cargar el listado de obras sociales.
               </p>
             )}
-            <p className="mt-1 text-xs text-slate-500">
-              Dejá en blanco si el paciente no tiene cobertura.
-            </p>
           </div>
           <div>
             <label htmlFor="numeroAfiliado" className="text-sm font-medium text-primary-900">

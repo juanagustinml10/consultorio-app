@@ -55,33 +55,6 @@ pacientesRouter.post('/', async (req: Request, res: Response) => {
   const datos = crearPacienteSchema.parse(req.body)
   const sesion = sesionDe(req)
 
-  // Resolver obra social: puede venir como ID, nombre de texto libre, o vacío.
-  // Si es un nombre que no existe, se crea la obra social automáticamente.
-  let obraSocialIdResuelto: string | undefined = undefined
-  if (datos.obraSocialId) {
-    const porId = await prisma.obraSocial.findUnique({
-      where: { id: datos.obraSocialId },
-      select: { id: true },
-    })
-    if (porId) {
-      obraSocialIdResuelto = porId.id
-    } else {
-      const porNombre = await prisma.obraSocial.findFirst({
-        where: { nombre: datos.obraSocialId },
-        select: { id: true },
-      })
-      if (porNombre) {
-        obraSocialIdResuelto = porNombre.id
-      } else {
-        const creada = await prisma.obraSocial.create({
-          data: { nombre: datos.obraSocialId },
-          select: { id: true },
-        })
-        obraSocialIdResuelto = creada.id
-      }
-    }
-  }
-
   try {
     const paciente = await prisma.paciente.create({
       data: {
@@ -89,7 +62,8 @@ pacientesRouter.post('/', async (req: Request, res: Response) => {
         fechaNacimiento: datos.fechaNacimiento
           ? new Date(`${datos.fechaNacimiento}T00:00:00`)
           : undefined,
-        obraSocialId: obraSocialIdResuelto,
+        // obraSocialId: string|undefined|null ya encaja con el FK opcional
+        obraSocialId: datos.obraSocialId ?? undefined,
       },
       include: incluirObraSocial,
     })
@@ -124,36 +98,6 @@ pacientesRouter.put('/:id', async (req: Request, res: Response) => {
     return
   }
 
-  // Resolver obra social: puede venir como ID, nombre de texto libre, null o undefined.
-  let obraSocialIdResuelto: string | null | undefined = undefined
-  if (datos.obraSocialId !== undefined) {
-    if (!datos.obraSocialId) {
-      obraSocialIdResuelto = null
-    } else {
-      const porId = await prisma.obraSocial.findUnique({
-        where: { id: datos.obraSocialId },
-        select: { id: true },
-      })
-      if (porId) {
-        obraSocialIdResuelto = porId.id
-      } else {
-        const porNombre = await prisma.obraSocial.findFirst({
-          where: { nombre: datos.obraSocialId },
-          select: { id: true },
-        })
-        if (porNombre) {
-          obraSocialIdResuelto = porNombre.id
-        } else {
-          const creada = await prisma.obraSocial.create({
-            data: { nombre: datos.obraSocialId },
-            select: { id: true },
-          })
-          obraSocialIdResuelto = creada.id
-        }
-      }
-    }
-  }
-
   try {
     const paciente = await prisma.paciente.update({
       where: { id },
@@ -164,7 +108,9 @@ pacientesRouter.put('/:id', async (req: Request, res: Response) => {
             ? new Date(`${datos.fechaNacimiento}T00:00:00`)
             : null,
         }),
-        ...(obraSocialIdResuelto !== undefined && { obraSocialId: obraSocialIdResuelto }),
+        ...(datos.obraSocialId !== undefined && {
+          obraSocialId: datos.obraSocialId ?? null,
+        }),
       },
       include: incluirObraSocial,
     })
