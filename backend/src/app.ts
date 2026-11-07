@@ -41,7 +41,10 @@ const health = async (_req: express.Request, res: express.Response) => {
   try {
     await prisma.$queryRaw`SELECT 1`
     res.json({ estado: 'ok', servicio: 'consultorio-api', db: 'conectada' })
-  } catch {
+  } catch (error) {
+    // Detalle sólo en los logs del servidor (Runtime Logs de Vercel);
+    // la respuesta pública se mantiene estable sin filtrar datos.
+    console.error('[health] consulta a la BD falló:', error instanceof Error ? error.message : error)
     res.status(503).json({ estado: 'degradado', servicio: 'consultorio-api', db: 'sin conexión' })
   }
 }

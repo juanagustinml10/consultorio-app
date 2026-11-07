@@ -48,13 +48,62 @@ export function normalizarUrlPostgres(cadena: string): string {
   }
 }
 
+/**
+ * Normaliza el valor de una variable de entorno de tipo cadena.
+ *
+ * dotenv quita las comillas envolventes del `.env`, pero Vercel inyecta las
+ * variables del dashboard tal cual se cargaron. Un `DATABASE_URL` cargado con
+ * comillas (`"postgresql://..."`) hace que `new URL` falle y que `pg` reciba
+ * un host inválido -> "sin conexión" en producción sin más detalle.
+ */
+function limpiarValorCadena(valor: string): string {
+  let cadena = valor.replace(/^\uFEFF/, '').trim()
+  if (cadena.length >= 2) {
+    const primera = cadena[0]
+    const ultima = cadena[cadena.length - 1]
+    if ((primera === '"' && ultima === '"') || (primera === "'" && ultima === "'")) {
+      cadena = cadena.slice(1, -1).trim()
+    }
+  }
+  return cadena
+}
+
+/** Hostname local: nunca exigir SSL a un servidor propio de desarrollo. */
+function esHostLocal(hostname: string): boolean {
+  return (
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '::1' ||
+    hostname.endsWith('.local')
+  )
+}
+
+/**
+ * Supabase (y PostgreSQL administrado en general) exige TLS. El motor nativo
+ * de Prisma activaba SSL por defecto; `pg` no lo hace salvo `sslmode` en la
+ * URL u `ssl` explícito. Para hosts remotos sin configuración explícita se
+ * activa TLS sin validar certificado (equivalente a `sslmode=require`).
+ */
+function requiereSsl(cadena: string): boolean {
+  try {
+    const url = new URL(cadena)
+    if (url.protocol !== 'postgres:' && url.protocol !== 'postgresql:') return false
+    if (esHostLocal(url.hostname)) return false
+    return !url.searchParams.has('sslmode') && !url.searchParams.has('ssl')
+  } catch {
+    return false
+  }
+}
+
 function esEntornoWorkers(): boolean {
   return esCloudflareWorkers()
 }
 
-function crearCliente(cadena: string): PrismaClient {
+function crearCliente(cadenaBruta: string): PrismaClient {
+  const cadena = limpiarValorCadena(cadenaBruta)
   const adapter = new PrismaPg({
     connectionString: normalizarUrlPostgres(cadena),
+    ...(requiereSsl(cadena) ? { ssl: { rejectUnauthorized: false } } : {}),
     // Cloudflare Workers prohíbe reutilizar un socket TCP entre solicitudes
     // distintas ("Cannot perform I/O on behalf of a different request"). El
     // pool de `pg` conserva conexiones ociosas por defecto, por lo que la
@@ -75,9 +124,13 @@ function crearCliente(cadena: string): PrismaClient {
 
 function obtenerCliente(): PrismaClient {
   if (!cliente) {
-    const cadena = valorEntorno('DATABASE_URL')
-    if (!cadena) {
+    const bruta = valorEntorno('DATABASE_URL')
+    if (!bruta) {
       throw new Error('Falta configurar DATABASE_URL para conectarse a PostgreSQL')
+    }
+    const cadena = limpiarValorCadena(bruta)
+    if (!cadena) {
+      throw new Error('La variable DATABASE_URL está vacía o sólo contiene comillas/espacios')
     }
     cliente = crearCliente(cadena)
     cadenaActual = cadena
@@ -91,8 +144,9 @@ function obtenerCliente(): PrismaClient {
  * Es idempotente: en llamadas sucesivas del mismo isolate reutiliza el cliente.
  */
 export function configurarPrisma(env: EntornoPrisma | undefined): void {
-  const cadena =
+  const bruta =
     env?.HYPERDRIVE?.connectionString ?? env?.DATABASE_URL ?? valorEntorno('DATABASE_URL')
+  const cadena = bruta ? limpiarValorCadena(bruta) : undefined
 
   // Sin configuración no se adelanta un error acá: /health debe poder
   // responder 503 y el resto de las rutas lo reporta al consultar la BD.
