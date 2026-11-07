@@ -95,7 +95,7 @@ export function FormularioPaciente({
       telefono: valoresIniciales?.telefono ?? '',
       email: valoresIniciales?.email ?? '',
       direccion: valoresIniciales?.direccion ?? '',
-      obraSocialId: valoresIniciales?.obraSocialId ?? '',
+      obraSocialId: valoresIniciales?.obraSocial ?? valoresIniciales?.obraSocialId ?? '',
       numeroAfiliado: valoresIniciales?.numeroAfiliado ?? '',
       notas: valoresIniciales?.notas ?? '',
     },
@@ -272,23 +272,30 @@ export function FormularioPaciente({
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-primary-700">Cobertura</h3>
         <div className={claseGrid}>
-          <div>
+          <div className="sm:col-span-2">
             <label htmlFor="obraSocial" className="text-sm font-medium text-primary-900">
               Obra social / prepaga
             </label>
-            <select id="obraSocial" className={claseInput} {...register('obraSocialId')}>
-              <option value="">Sin cobertura</option>
+            <input
+              id="obraSocial"
+              list="obras-lista"
+              className={claseInput}
+              {...register('obraSocialId')}
+              placeholder="Seleccioná o escribí la obra social"
+            />
+            <datalist id="obras-lista">
               {obras.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.nombre}
-                </option>
+                <option key={o.id} value={o.nombre}>{o.nombre}</option>
               ))}
-            </select>
+            </datalist>
             {obrasError && (
               <p className="mt-1.5 text-xs text-amber-600">
                 No se pudo cargar el listado de obras sociales.
               </p>
             )}
+            <p className="mt-1 text-xs text-slate-500">
+              Dejá en blanco si el paciente no tiene cobertura.
+            </p>
           </div>
           <div>
             <label htmlFor="numeroAfiliado" className="text-sm font-medium text-primary-900">
