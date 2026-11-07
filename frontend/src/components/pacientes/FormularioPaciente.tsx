@@ -272,7 +272,7 @@ export function FormularioPaciente({
       <div>
         <h3 className="text-xs font-semibold uppercase tracking-wide text-primary-700">Cobertura</h3>
         <div className={claseGrid}>
-          <div className="sm:col-span-2">
+          <div>
             <label htmlFor="obraSocial" className="text-sm font-medium text-primary-900">
               Obra social / prepaga
             </label>
