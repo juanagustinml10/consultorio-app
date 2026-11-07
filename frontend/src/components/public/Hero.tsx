@@ -1,4 +1,4 @@
-import { CalendarCheck, Clock3, MapPin, Phone, Stethoscope } from 'lucide-react'
+import { CalendarCheck, Clock3, CreditCard, MapPin, Phone, Stethoscope } from 'lucide-react'
 import { consultorio, contacto, perfilMedico } from '@/data/sitio'
 
 /** Botón flotante de WhatsApp del consultorio. */
@@ -110,6 +110,16 @@ export function Hero() {
                 </span>
               </span>
             </a>
+          </div>
+
+          {/* Recuadro: obras sociales */}
+          <div className="mt-6 flex w-full items-center justify-center rounded-xl border border-accent-200/50 bg-accent-50/10 p-4 sm:mt-8 sm:p-5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-600">
+              <CreditCard className="h-4 w-4" aria-hidden="true" />
+            </div>
+            <span className="ml-3 text-sm font-medium text-primary-900 sm:ml-4 sm:text-base">
+              Se reciben todas las obras sociales
+            </span>
           </div>
 
           {/* Acciones: a ancho completo en móvil, cómodas al pulgar */}
