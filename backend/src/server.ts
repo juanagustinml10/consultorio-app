@@ -18,6 +18,10 @@ function cargarApp(): Promise<Express> {
 // Separa el arranque de Express del núcleo para que Vercel pueda responder
 // aunque una dependencia falle al inicializarse; el detalle queda solo en logs.
 const app = express()
+// Endpoint temporal de diagnóstico: no lee ni expone valores de configuración.
+app.get('/api/__runtime', (_req, res) => {
+  res.json({ node: process.versions.node.split('.')[0], databaseConfigured: Boolean(process.env.DATABASE_URL) })
+})
 app.use((req, res, next) => {
   void cargarApp()
     .then((api) => api(req, res, next))
