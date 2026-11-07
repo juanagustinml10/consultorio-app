@@ -6,8 +6,17 @@ import { createServer } from 'node:net'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { once } from 'node:events'
-import { PrismaClient } from '../src/generated/prisma/index.js'
-import { hash } from '@node-rs/argon2'
+import { PrismaClient } from '@prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { argon2id } from '@noble/hashes/argon2'
+
+const base64 = (bytes) => Buffer.from(bytes).toString('base64').replace(/=+$/, '')
+const hash = (password) => {
+  const salt = randomBytes(16)
+  const derivada = argon2id(password, salt, { t: 2, m: 19456, p: 1, dkLen: 32, version: 0x13 })
+  return `$argon2id$v=19$m=19456,t=2,p=1$${base64(salt)}$${base64(derivada)}`
+}
+const crearPrisma = (url) => new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) })
 
 const baseUrl = new URL(process.env.DATABASE_URL ?? '')
 if (baseUrl.protocol !== 'postgresql:' || baseUrl.pathname !== '/consultorio_db') {
@@ -406,7 +415,7 @@ async function iniciarSesion(base, email) {
 }
 
 try {
-  admin = new PrismaClient({ datasources: { db: { url: baseUrl.toString() } } })
+  admin = crearPrisma(baseUrl.toString())
   const estado = await admin.$queryRaw`SELECT current_database() AS db, current_user AS role, r.rolcreatedb AS can_create_database FROM pg_roles r WHERE r.rolname = current_user`
   if (estado[0]?.db !== 'consultorio_db' || estado[0]?.can_create_database !== true) {
     throw new Error('La conexión no confirmó consultorio_db y privilegio para crear una base aislada.')
@@ -421,7 +430,7 @@ try {
   if (migracion.status !== 0) throw new Error(`No se pudo preparar el esquema aislado: ${migracion.stderr || migracion.stdout}`)
   console.log('Esquema preparado en la base temporal con prisma db push; no se ejecutaron migraciones.')
 
-  db = new PrismaClient({ datasources: { db: { url: testUrl.toString() } } })
+  db = crearPrisma(testUrl.toString())
   const [medicoHash, secretariaHash] = await Promise.all([
     hash('Prueba-Temporal-2026!'), hash('Prueba-Temporal-2026!'),
   ])

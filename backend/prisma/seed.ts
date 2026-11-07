@@ -1,15 +1,17 @@
-import { PrismaClient } from '@prisma/client'
-import { hash } from '@node-rs/argon2'
+import 'dotenv/config'
+import { prisma } from '../src/lib/prisma'
+import { hashearContrasena } from '../src/lib/password'
 
 // DATOS DE PRUEBA (ficticios): usuarios demo, pacientes y turnos de hoy.
 // Los usuarios de prueba sirven para validar la autenticación real de la etapa 2.
-const prisma = new PrismaClient()
+// Se reutiliza el cliente de la app para que el seed también funcione con el
+// adaptador de PostgreSQL (sin motor nativo de Prisma).
 
 const CONTRASENA_DEMO = 'demo1234'
 
 async function main() {
   // ----- Usuarios de prueba (argón2id) -----
-  const hashMedico = await hash(CONTRASENA_DEMO)
+  const hashMedico = await hashearContrasena(CONTRASENA_DEMO)
   const medico = await prisma.usuario.upsert({
     where: { email: 'medico@demo.com' },
     update: { contrasenaHash: hashMedico, nombre: 'Gustavo', apellido: 'Puertas', activo: true },
@@ -22,7 +24,7 @@ async function main() {
     },
   })
 
-  const hashSecretaria = await hash(CONTRASENA_DEMO)
+  const hashSecretaria = await hashearContrasena(CONTRASENA_DEMO)
   await prisma.usuario.upsert({
     where: { email: 'secretaria@demo.com' },
     update: { contrasenaHash: hashSecretaria, nombre: 'Sofía', apellido: 'Gómez', activo: true },

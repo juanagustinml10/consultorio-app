@@ -5,7 +5,8 @@
 //             transacciones dedicadas que el pooler en modo transacción no da).
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "client"
 }
 
 datasource db {

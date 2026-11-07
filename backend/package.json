@@ -8,7 +8,10 @@
   },
   "scripts": {
     "dev": "tsx watch src/server.ts",
+    "dev:worker": "prisma generate && wrangler dev",
     "build": "tsc",
+    "build:worker": "prisma generate && tsc --noEmit && wrangler deploy --dry-run",
+    "deploy:worker": "prisma generate && wrangler deploy",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "prisma generate",
@@ -19,13 +22,15 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
-    "@node-rs/argon2": "^2.2.2",
+    "@noble/hashes": "^1.8.0",
+    "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.18.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "pdfkit": "^0.20.2",
+    "pg": "^8.23.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {
@@ -34,8 +39,10 @@
     "@types/express": "^5.0.3",
     "@types/node": "^24.10.1",
     "@types/pdfkit": "^0.17.7",
+    "@types/pg": "^8.23.1",
     "prisma": "^6.18.0",
     "tsx": "^4.20.6",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "wrangler": "^4.158.0"
   }
 }
