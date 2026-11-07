@@ -1,5 +1,5 @@
-import { Building2, Clock3, CreditCard, MapPin, MessageCircle, Phone } from 'lucide-react'
-import { consultorio, contacto, horariosAtencion, obrasSociales } from '@/data/sitio'
+import { Clock3, CreditCard, MapPin, MessageCircle, Phone } from 'lucide-react'
+import { consultorio, contacto, horariosAtencion } from '@/data/sitio'
 import { SeccionPublica } from './SeccionPublica'
 
 export function SeccionObrasSociales() {
@@ -9,19 +9,6 @@ export function SeccionObrasSociales() {
       titulo="Obras sociales y prepagas"
       subtitulo="Coberturas aceptadas en el consultorio."
     >
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {obrasSociales.map((o) => (
-          <div
-            key={o}
-            className="flex items-center gap-3 rounded-2xl border border-primary-100 bg-white px-4 py-3.5 shadow-card"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
-              <Building2 className="h-4 w-4" aria-hidden="true" />
-            </span>
-            <span className="min-w-0 text-sm font-medium text-primary-900">{o}</span>
-          </div>
-        ))}
-      </div>
       {/* Recuadro: todas las obras sociales */}
       <div className="mt-6 flex w-full items-center justify-center rounded-xl border border-accent-200/50 bg-accent-50/10 p-4 sm:mt-8 sm:p-5">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-600">
@@ -145,7 +132,7 @@ export function SeccionContacto() {
           href={consultorio.mapsUrl}
           target="_blank"
           rel="noreferrer"
-          className="group rounded-2xl border border-primary-100 bg-white p-6 shadow-card transition hover:-translate-y-1 hover:shadow-card-hover"
+          className="group rounded-2xl border border-primary-100 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card-hover"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-100 text-primary-700">
             <MapPin className="h-5 w-5" aria-hidden="true" />
