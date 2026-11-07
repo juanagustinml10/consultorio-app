@@ -1,0 +1,11 @@
+# Cloudflare Pages — proyecto consultorio-app
+#
+# El frontend se publica en Cloudflare Pages y sus Functions (proxy inverso
+# de la API) viven en frontend/functions/.
+#
+# Despliegue (solo cuando se autorice):
+#   npx wrangler pages deploy frontend/dist --project-name consultorio-app --functions-dir frontend/functions
+
+name = "consultorio-app"
+compatibility_date = "2026-11-07"
+pages_build_output_dir = "dist"

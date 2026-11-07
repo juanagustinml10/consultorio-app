@@ -1,12 +1,13 @@
 /**
  * Cliente HTTP para la API del backend.
- * Usa cookies HttpOnly para la sesión (credentials: 'include').
+ *
+ * Las solicitudes van al mismo origen (Cloudflare Pages) y el proxy de
+ * Pages Functions (frontend/functions/api/[[path]].ts) las reenvía al
+ * backend de Vercel. Usa cookies HttpOnly para la sesión
+ * (credentials: 'include').
  */
 
-const apiBaseConfigurada = import.meta.env.VITE_API_BASE_URL?.trim()
-export const API_BASE = apiBaseConfigurada
-  ? `${apiBaseConfigurada.replace(/\/$/, '')}/api/v1`
-  : '/api/v1'
+export const API_BASE = '/api/v1'
 
 export class ApiError extends Error {
   readonly status: number
