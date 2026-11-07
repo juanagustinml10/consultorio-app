@@ -69,8 +69,11 @@ export function Hero() {
           <h1 className="mt-4 text-4xl font-extrabold leading-[1.06] tracking-tight text-balance sm:mt-5 sm:text-5xl lg:text-6xl">
             {perfilMedico.nombre}
           </h1>
+          <p className="mt-1 text-xs text-accent-400/70">
+            Matrícula profesional: {perfilMedico.matricula}
+          </p>
           <p className="mt-2.5 text-base font-semibold text-accent-300 sm:mt-3 sm:text-lg">
-            Medicina clínica
+            MEDICO GENERALISTA
           </p>
 
           <p className="mt-4 text-sm leading-relaxed text-primary-100/85 sm:mt-5 sm:text-lg">
@@ -84,9 +87,9 @@ export function Hero() {
                 <Clock3 className="h-4.5 w-4.5 text-accent-300" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1 text-sm text-primary-100/90 sm:text-base">
-                <strong className="font-semibold text-white">Lunes a Jueves</strong>
+                <strong className="font-semibold text-white">Lunes a Viernes</strong>
                 <span className="mx-1.5 text-white/40">·</span>
-                <span className="numeros-tabulares">desde las 17:00</span>
+                <span className="numeros-tabulares">desde las 17 hs</span>
               </span>
             </div>
             <div className="h-px bg-white/10" aria-hidden="true" />

@@ -8,6 +8,7 @@
 
 export const perfilMedico = {
   nombre: 'Dr. Gustavo Puertas',
+  matricula: '3503',
   descripcion:
     'Atención médica personalizada y seguimiento cercano de cada paciente. La inscripción es por orden de llegada: te registrás al llegar y esperás tu lugar.',
 }
@@ -23,15 +24,15 @@ export const consultorio = {
 }
 
 export const contacto = {
-  telefonoVisible: '3865 481557',
-  telUrl: 'tel:+5493865481557',
-  whatsappUrl: 'https://wa.me/5493865481557',
+  telefonoVisible: '3865 536710',
+  telUrl: 'tel:+5493865536710',
+  whatsappUrl: 'https://wa.me/5493865536710',
 }
 
 export const horariosAtencion = [
   {
-    dias: 'Lunes a Jueves',
-    franja: 'desde las 17:00',
+    dias: 'Lunes a Viernes',
+    franja: 'desde las 17 hs',
   },
 ]
 
@@ -54,7 +55,7 @@ export const preguntasFrecuentes = [
   },
   {
     pregunta: '¿Cuándo atiende el consultorio?',
-    respuesta: 'De lunes a jueves desde las 17:00 hs. Podés pasar a inscribirte en ese horario.',
+    respuesta: 'De lunes a viernes desde las 17 hs. Podés pasar a inscribirte en ese horario.',
   },
   {
     pregunta: '¿Cómo funciona la inscripción del día?',
