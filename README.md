@@ -47,6 +47,9 @@ npm run dev
 
 El frontend hace proxy de `/api/*` hacia el backend (`vite.config.ts`).
 
+> Para despliegue en producción (Vercel/Supabase o Cloudflare Workers) ver
+> [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+
 ## Rutas
 
 | Ruta                  | Página                                  |

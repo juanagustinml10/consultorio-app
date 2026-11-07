@@ -1,0 +1,30 @@
+# Copiar a .dev.vars para `npm run dev:worker` (Wrangler).
+# .dev.vars está ignorado por Git. No commitear valores reales.
+
+# Conexión a PostgreSQL usada por el runtime del Worker cuando NO se usa
+# Hyperdrive (o cuando se prueba localmente sin binding).
+DATABASE_URL="postgresql://USUARIO:CONTRASENA@HOST:PUERTO/BASE?schema=public&sslmode=require"
+
+# Si el wrangler.jsonc tiene el binding HYPERDRIVE y querés probarlo localmente,
+# Wrangler lee la cadena desde esta variable (no es una variable de la app):
+# CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE="postgresql://USUARIO:CONTRASENA@HOST:PUERTO/BASE"
+
+# Origen del frontend (Pages/Vite). Sin barra final.
+CORS_ORIGIN="http://localhost:5173"
+
+# Secreto estable de 32+ bytes para el HMAC del rate limit de login.
+# Si se omite, se deriva de DATABASE_URL.
+LOGIN_RATE_LIMIT_SECRET=""
+
+# Duración de la sesión en horas.
+SESION_HORAS=8
+
+# lax (por defecto) | strict | none.
+# Usar "none" sólo si el frontend y la API están en dominios distintos;
+# implica cookies Secure (HTTPS).
+# Para Pages en pages.dev y API en workers.dev los sitios son distintos:
+# COOKIE_SAMESITE=none (los navegadores pueden restringir cookies de terceros).
+COOKIE_SAMESITE=lax
+
+# development para pruebas locales con Wrangler; production en el Worker desplegado.
+NODE_ENV=development
