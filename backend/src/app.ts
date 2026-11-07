@@ -15,6 +15,7 @@ import { turnosRouter } from './routes/turnos'
 import { historiasRouter } from './routes/historias'
 import { estadisticasRouter } from './routes/estadisticas'
 import { sitioRouter } from './routes/sitio'
+import { auditoriaRouter } from './routes/auditoria'
 import { manejarError } from './middlewares/error'
 import { valorEntorno } from './lib/runtimeConfig'
 
@@ -64,6 +65,7 @@ app.use('/api/v1/obras-sociales', obrasRouter)
 app.use('/api/v1/appointments', turnosRouter)
 app.use('/api/v1/medical-records', historiasRouter)
 app.use('/api/v1/estadisticas', estadisticasRouter)
+app.use('/api/v1/audit-log', auditoriaRouter)
 
 // Sitio público (contenido administrable) — pendiente de implementación
 app.use('/api/sitio', sitioRouter)

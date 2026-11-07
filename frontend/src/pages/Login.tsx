@@ -127,15 +127,6 @@ export default function LoginPage() {
             Ingresar
           </button>
 
-          <div className="mt-5 rounded-lg bg-slate-50 p-3 text-center text-xs text-slate-500">
-            <p className="font-medium">Usuarios de prueba:</p>
-            <p className="mt-1">
-              Médico: <span className="font-mono">medico@demo.com</span> / <span className="font-mono">demo1234</span>
-            </p>
-            <p>
-              Secretaria: <span className="font-mono">secretaria@demo.com</span> / <span className="font-mono">demo1234</span>
-            </p>
-          </div>
         </form>
 
         <Link
