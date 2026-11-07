@@ -9,14 +9,22 @@ export function SeccionObrasSociales() {
       titulo="Obras sociales y prepagas"
       subtitulo="Coberturas aceptadas en el consultorio."
     >
-      {/* Recuadro: todas las obras sociales */}
-      <div className="mt-6 flex w-full items-center justify-center rounded-xl border border-accent-200/50 bg-accent-50/10 p-4 sm:mt-8 sm:p-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-600">
-          <CreditCard className="h-4 w-4" aria-hidden="true" />
+      {/* Recuadro destacado: todas las obras sociales */}
+      <div className="relative rounded-3xl border border-accent-200 bg-accent-50 p-8 sm:p-10 shadow-sm overflow-hidden">
+        {/* Banda decorativa superior */}
+        <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-1 w-full sm:h-2 sm:w-full bg-accent-500 rounded-full sm:rounded-none sm:h-full sm:w-2" />
+
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6 sm:items-start">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-100 text-accent-600 sm:h-16 sm:w-16">
+            <CreditCard className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden="true" />
+          </div>
+          <div className="text-center sm:text-left">
+            <h3 className="text-xl font-bold text-primary-900 sm:text-2xl">Se reciben todas las obras sociales</h3>
+            <p className="mt-1 text-sm text-primary-600/70 sm:mt-2 sm:text-base">
+              Aceptamos las principales obras sociales y prepagas del país. Consultanos por tu cobertura.
+            </p>
+          </div>
         </div>
-        <span className="ml-3 text-sm font-medium text-primary-900 sm:ml-4 sm:text-base">
-          Se reciben todas las obras sociales
-        </span>
       </div>
     </SeccionPublica>
   )
