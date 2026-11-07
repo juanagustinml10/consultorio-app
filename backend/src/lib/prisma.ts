@@ -175,3 +175,35 @@ export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
     return typeof valor === 'function' ? valor.bind(activo) : valor
   },
 })
+
+/**
+ * Vercel empaqueta la función rastreando las dependencias con @vercel/nft, que
+ * no puede seguir la lectura del WASM que hace el cliente de Prisma (el cliente
+ * arma la ruta en runtime con una variable). Una lectura con `__dirname` y
+ * partes estáticas es el patrón que nft rastrea de forma fiable: fuerza a que
+ * `query_compiler_bg.wasm` quede dentro del paquete de la función en cualquier
+ * despliegue en Node, sin depender de `functions.includeFiles` en vercel.json.
+ *
+ * En Workers la protección del runtime hace el trabajo y `__dirname` no existe
+ * (módulo ESM); por eso queda acotado a Node (desarrollo local y Vercel).
+ */
+if (typeof __dirname !== 'undefined' && !esEntornoWorkers()) {
+  try {
+    const fsTrazado = require('node:fs') as typeof import('node:fs')
+    const archivoWasm = fsTrazado.readFileSync(
+      (require('node:path') as typeof import('node:path')).join(
+        __dirname,
+        '..',
+        '..',
+        'node_modules',
+        '.prisma',
+        'client',
+        'query_compiler_bg.wasm',
+      ),
+    )
+    if (archivoWasm.byteLength === 0) throw new Error('WASM vacío')
+  } catch {
+    // Desarrollo sin cliente generado aún: Prisma reportará su propio error
+    // descriptivo al ejecutar consultas; no se oculta información al usuario.
+  }
+}
