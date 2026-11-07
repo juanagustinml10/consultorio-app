@@ -41,9 +41,21 @@ export const horariosAtencion = [
  * Reemplazar por los nombres reales cuando estén definidos.
  */
 export const obrasSociales = [
-  'Obra Social Ejemplo A',
-  'Prepaga Ejemplo 2',
-  'Prepaga Ejemplo 3',
+  'OSDE',
+  'Swiss Medical',
+  'Galeno',
+  'Medicus',
+  'Medifé',
+  'Avalian',
+  'Nobis',
+  'Jerárquicos Salud',
+  'PAMI',
+  'Subsidio de Salud',
+  'IOSFA',
+  'ASUNT',
+  'Luis Pasteur',
+  'OSDEPYM',
+  'AMFFA',
   'Particular',
 ]
 
