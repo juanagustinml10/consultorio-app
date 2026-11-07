@@ -1,4 +1,4 @@
-import { Building2, Clock3, MapPin, MessageCircle, Phone } from 'lucide-react'
+import { Building2, Clock3, CreditCard, MapPin, MessageCircle, Phone } from 'lucide-react'
 import { consultorio, contacto, horariosAtencion, obrasSociales } from '@/data/sitio'
 import { SeccionPublica } from './SeccionPublica'
 
@@ -21,6 +21,15 @@ export function SeccionObrasSociales() {
             <span className="min-w-0 text-sm font-medium text-primary-900">{o}</span>
           </div>
         ))}
+      </div>
+      {/* Recuadro: todas las obras sociales */}
+      <div className="mt-6 flex w-full items-center justify-center rounded-xl border border-accent-200/50 bg-accent-50/10 p-4 sm:mt-8 sm:p-5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-600">
+          <CreditCard className="h-4 w-4" aria-hidden="true" />
+        </div>
+        <span className="ml-3 text-sm font-medium text-primary-900 sm:ml-4 sm:text-base">
+          Se reciben todas las obras sociales
+        </span>
       </div>
     </SeccionPublica>
   )
