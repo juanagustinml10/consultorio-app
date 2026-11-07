@@ -5,17 +5,13 @@
   "engines": {
     "node": "22.x"
   },
-  "workspaces": [
-    "backend",
-    "frontend"
-  ],
   "description": "Sistema de gestión del consultorio médico",
   "scripts": {
     "dev": "concurrently -k -n \"FRONTEND,BACKEND\" -c \"cyan,green\" \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
     "dev:frontend": "npm run dev --prefix frontend",
     "dev:backend": "npm run dev --prefix backend",
-    "build": "npm run prisma:generate --workspace=consultorio-app-backend && npm run build --workspace=consultorio-app-backend && npm run build --workspace=consultorio-app-frontend",
-    "typecheck": "npm run typecheck --workspace=consultorio-app-backend && npm run typecheck --workspace=consultorio-app-frontend"
+    "build": "npm run prisma:generate --prefix backend && npm run build --prefix backend && npm run build --prefix frontend",
+    "typecheck": "npm run typecheck --prefix backend && npm run typecheck --prefix frontend"
   },
   "devDependencies": {
     "concurrently": "^9.2.1"
