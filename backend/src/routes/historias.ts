@@ -1,4 +1,4 @@
-import { Router, type Request, type Response } from 'express'
+﻿import { Router, type Request, type Response } from 'express'
 import { prisma } from '../lib/prisma'
 import { parsearIsoLocal, serializarPaciente } from '../lib/serialize'
 import { registrarAccionEnTransaccion } from '../lib/audit'
@@ -6,12 +6,12 @@ import { requireAuth, sesionDe } from '../middlewares/auth'
 import { crearConsultaSchema, editarConsultaSchema, editarEncabezadoSchema } from '../validations'
 
 /**
- * Historias clínicas. Ambos roles (MEDICO y SECRETARIA) tienen permiso de
- * lectura y modificación clínica según lo acordado; las protecciones son las
+ * Historias clÃ­nicas. Ambos roles (MEDICO y SECRETARIA) tienen permiso de
+ * lectura y modificaciÃ³n clÃ­nica segÃºn lo acordado; las protecciones son las
  * siguientes:
- *   - toda modificación se registra con usuario y fecha (auditoría);
- *   - cada PUT conserva la versión anterior en consultas_clinicas_versiones;
- *   - no existen endpoints DELETE para registros clínicos;
+ *   - toda modificaciÃ³n se registra con usuario y fecha (auditorÃ­a);
+ *   - cada PUT conserva la versiÃ³n anterior en consultas_clinicas_versiones;
+ *   - no existen endpoints DELETE para registros clÃ­nicos;
  *   - las correcciones se identifican con el flag esCorreccion.
  */
 export const historiasRouter = Router()
@@ -43,7 +43,7 @@ async function historiaActualizada(pacienteId: string) {
   })
 }
 
-/** GET /medical-records/:patientId — historia completa + consultas cronológicas. */
+/** GET /medical-records/:patientId â€” historia completa + consultas cronolÃ³gicas. */
 historiasRouter.get('/:patientId', async (req: Request, res: Response) => {
   const pacienteId = String(req.params.patientId)
 
@@ -66,11 +66,10 @@ historiasRouter.get('/:patientId', async (req: Request, res: Response) => {
         id: c.id,
         fecha: c.fecha,
         motivoConsulta: c.motivoConsulta,
-        sintomas: c.sintomas,
-        evaluacion: c.evaluacion,
         diagnostico: c.diagnostico,
         tratamiento: c.tratamiento,
         indicaciones: c.indicaciones,
+        derivaciones: c.derivaciones,
         proximoControl: c.proximoControl,
         version: c.version,
         esCorreccion: c.esCorreccion,
@@ -87,7 +86,7 @@ historiasRouter.get('/:patientId', async (req: Request, res: Response) => {
   })
 })
 
-/** PUT /medical-records/:patientId — actualiza antecedentes, alergias, medicación y observaciones clínicas. */
+/** PUT /medical-records/:patientId â€” actualiza antecedentes, alergias, medicaciÃ³n y observaciones clÃ­nicas. */
 historiasRouter.put('/:patientId', async (req: Request, res: Response) => {
   const datos = editarEncabezadoSchema.parse(req.body)
   const sesion = sesionDe(req)
@@ -152,7 +151,7 @@ historiasRouter.put('/:patientId', async (req: Request, res: Response) => {
   res.json({ historia })
 })
 
-/** POST /medical-records/:patientId/consultations — nueva consulta independiente. */
+/** POST /medical-records/:patientId/consultations â€” nueva consulta independiente. */
 historiasRouter.post('/:patientId/consultations', async (req: Request, res: Response) => {
   const datos = crearConsultaSchema.parse(req.body)
   const sesion = sesionDe(req)
@@ -189,11 +188,10 @@ historiasRouter.post('/:patientId/consultations', async (req: Request, res: Resp
           turnoId: datos.turnoId,
           fecha: datos.fecha ? parsearIsoLocal(datos.fecha) : new Date(),
           motivoConsulta: datos.motivoConsulta ?? undefined,
-          sintomas: datos.sintomas,
-          evaluacion: datos.evaluacion,
           diagnostico: datos.diagnostico,
           tratamiento: datos.tratamiento,
           indicaciones: datos.indicaciones,
+          derivaciones: datos.derivaciones,
           proximoControl: datos.proximoControl ? parsearIsoLocal(datos.proximoControl) : null,
           registradoPorId: sesion.usuarioId,
         },
@@ -208,13 +206,13 @@ historiasRouter.post('/:patientId/consultations', async (req: Request, res: Resp
   } catch (error) {
     if (error instanceof Error && ['ATENCION_NO_ENCONTRADA', 'ATENCION_NO_ACTIVA', 'FECHA_ATENCION_INVALIDA'].includes(error.message)) {
       res.status(error.message === 'ATENCION_NO_ENCONTRADA' ? 404 : 409).json({
-        error: error.message === 'ATENCION_NO_ENCONTRADA' ? 'Atención no encontrada para este paciente.' :
-          error.message === 'ATENCION_NO_ACTIVA' ? 'La atención ya no está en curso.' : 'La consulta debe corresponder a la fecha de atención.',
+        error: error.message === 'ATENCION_NO_ENCONTRADA' ? 'AtenciÃ³n no encontrada para este paciente.' :
+          error.message === 'ATENCION_NO_ACTIVA' ? 'La atenciÃ³n ya no estÃ¡ en curso.' : 'La consulta debe corresponder a la fecha de atenciÃ³n.',
       })
       return
     }
     if (error instanceof Error && 'code' in error && (error as { code?: string }).code === 'P2002') {
-      res.status(409).json({ error: 'Ya existe una consulta guardada para esta atención.' })
+      res.status(409).json({ error: 'Ya existe una consulta guardada para esta atenciÃ³n.' })
       return
     }
     throw error
@@ -229,7 +227,7 @@ historiasRouter.post('/:patientId/consultations', async (req: Request, res: Resp
   })
 })
 
-/** PUT /medical-records/consultations/:id — corrige una consulta conservando la versión previa. */
+/** PUT /medical-records/consultations/:id â€” corrige una consulta conservando la versiÃ³n previa. */
 historiasRouter.put('/consultations/:id', async (req: Request, res: Response) => {
   const datos = editarConsultaSchema.parse(req.body)
   const sesion = sesionDe(req)
@@ -247,7 +245,7 @@ historiasRouter.put('/consultations/:id', async (req: Request, res: Response) =>
   if (previa.turnoId && datos.fecha !== undefined) {
     const atencion = await prisma.turno.findUnique({ where: { id: previa.turnoId }, select: { fechaAtencion: true } })
     if (atencion && datos.fecha.slice(0, 10) !== atencion.fechaAtencion.toISOString().slice(0, 10)) {
-      res.status(409).json({ error: 'La fecha de una consulta vinculada debe coincidir con su fecha de atención.' })
+      res.status(409).json({ error: 'La fecha de una consulta vinculada debe coincidir con su fecha de atenciÃ³n.' })
       return
     }
   }
@@ -255,22 +253,20 @@ historiasRouter.put('/consultations/:id', async (req: Request, res: Response) =>
   const valoresAnteriores = {
     fecha: previa.fecha.toISOString(),
     motivoConsulta: previa.motivoConsulta,
-    sintomas: previa.sintomas,
-    evaluacion: previa.evaluacion,
     diagnostico: previa.diagnostico,
     tratamiento: previa.tratamiento,
     indicaciones: previa.indicaciones,
+    derivaciones: (previa as { derivaciones?: string | null }).derivaciones ?? null,
     proximoControl: previa.proximoControl?.toISOString() ?? null,
   }
   const valoresNuevos = {
     ...valoresAnteriores,
     ...(datos.fecha !== undefined && { fecha: parsearIsoLocal(datos.fecha).toISOString() }),
     ...(datos.motivoConsulta !== undefined && { motivoConsulta: datos.motivoConsulta ?? null }),
-    ...(datos.sintomas !== undefined && { sintomas: datos.sintomas ?? null }),
-    ...(datos.evaluacion !== undefined && { evaluacion: datos.evaluacion ?? null }),
     ...(datos.diagnostico !== undefined && { diagnostico: datos.diagnostico ?? null }),
     ...(datos.tratamiento !== undefined && { tratamiento: datos.tratamiento ?? null }),
     ...(datos.indicaciones !== undefined && { indicaciones: datos.indicaciones ?? null }),
+    ...(datos.derivaciones !== undefined && { derivaciones: datos.derivaciones ?? null }),
     ...(datos.proximoControl !== undefined && {
       proximoControl: datos.proximoControl
         ? parsearIsoLocal(datos.proximoControl).toISOString()
@@ -280,11 +276,10 @@ historiasRouter.put('/consultations/:id', async (req: Request, res: Response) =>
   const etiquetasCampos: Record<keyof typeof valoresAnteriores, string> = {
     fecha: 'Fecha y hora',
     motivoConsulta: 'Motivo de consulta',
-    sintomas: 'Síntomas',
-    evaluacion: 'Evolución',
-    diagnostico: 'Diagnóstico',
+    diagnostico: 'Diagnóstico prescriptivo',
     tratamiento: 'Tratamiento',
-    indicaciones: 'Indicaciones y observaciones',
+    indicaciones: 'Indicaciones',
+    derivaciones: 'Derivaciones',
     proximoControl: 'Próximo control',
   }
   const cambios = (Object.keys(etiquetasCampos) as Array<keyof typeof valoresAnteriores>)
@@ -297,7 +292,7 @@ historiasRouter.put('/consultations/:id', async (req: Request, res: Response) =>
     }))
 
   const consulta = await prisma.$transaction(async (tx) => {
-    // Conservar la versión anterior (nunca se pierde información previa)
+    // Conservar la versiÃ³n anterior (nunca se pierde informaciÃ³n previa)
     await tx.consultaClinicaVersion.create({
       data: {
         consultaId: previa.id,
@@ -320,11 +315,10 @@ historiasRouter.put('/consultations/:id', async (req: Request, res: Response) =>
       data: {
         ...(datos.fecha !== undefined && { fecha: datos.fecha ? parsearIsoLocal(datos.fecha) : undefined }),
         ...(datos.motivoConsulta !== undefined && { motivoConsulta: datos.motivoConsulta ?? null }),
-        ...(datos.sintomas !== undefined && { sintomas: datos.sintomas }),
-        ...(datos.evaluacion !== undefined && { evaluacion: datos.evaluacion }),
         ...(datos.diagnostico !== undefined && { diagnostico: datos.diagnostico }),
         ...(datos.tratamiento !== undefined && { tratamiento: datos.tratamiento }),
         ...(datos.indicaciones !== undefined && { indicaciones: datos.indicaciones }),
+        ...(datos.derivaciones !== undefined && { derivaciones: datos.derivaciones }),
         ...(datos.proximoControl !== undefined && {
           proximoControl: datos.proximoControl ? parsearIsoLocal(datos.proximoControl) : null,
         }),
@@ -348,7 +342,7 @@ historiasRouter.put('/consultations/:id', async (req: Request, res: Response) =>
     await registrarAccionEnTransaccion(tx, {
       usuarioId: sesion.usuarioId, ip: req.ip, accion: 'ACTUALIZACION',
       entidad: 'ConsultaClinica', registroId: actualizada.id, previo: previa,
-      nuevo: { ...actualizada, detalle: `versión ${previa.version} → ${actualizada.version}`, cambios },
+      nuevo: { ...actualizada, detalle: `versiÃ³n ${previa.version} â†’ ${actualizada.version}`, cambios },
     })
     return actualizada
   })

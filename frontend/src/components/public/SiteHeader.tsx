@@ -1,13 +1,15 @@
 ﻿import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CalendarPlus, HeartPulse, Menu, X } from 'lucide-react'
+import { HeartPulse, Menu, MessageCircle, X } from 'lucide-react'
+import { contacto } from '@/data/sitio'
 
 const LINKS = [
-  { href: '#perfil', label: 'Perfil' },
+  { href: '#sobre', label: 'Perfil' },
   { href: '#horarios', label: 'Horarios' },
   { href: '#obras-sociales', label: 'Obras sociales' },
   { href: '#ubicacion', label: 'Ubicación' },
   { href: '#faq', label: 'Preguntas' },
+  { href: '#contacto', label: 'Contacto' },
 ]
 
 export function SiteHeader() {
@@ -17,7 +19,7 @@ export function SiteHeader() {
     <header className="sticky top-0 z-40 border-b border-primary-100/70 bg-white/90 shadow-sm backdrop-blur">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between gap-3">
-          <a href="#perfil" className="flex min-w-0 items-center gap-2">
+          <a href="#sobre" className="flex min-w-0 items-center gap-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary-900">
               <HeartPulse className="h-5 w-5 text-accent-300" aria-hidden="true" />
             </span>
@@ -40,11 +42,13 @@ export function SiteHeader() {
               </a>
             ))}
             <a
-              href="#contacto"
+              href={contacto.whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
               className="ml-2 inline-flex items-center gap-1.5 rounded-xl bg-primary-900 px-4 py-2 text-sm font-semibold text-white shadow-card transition hover:bg-primary-800"
             >
-              <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              Solicitar atención
+              <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              WhatsApp
             </a>
           </nav>
 
@@ -74,12 +78,14 @@ export function SiteHeader() {
               </a>
             ))}
             <a
-              href="#contacto"
+              href={contacto.whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
               onClick={() => setAbierto(false)}
               className="mt-2 flex items-center justify-center gap-1.5 rounded-xl bg-primary-900 px-4 py-3 text-sm font-semibold text-white"
             >
-              <CalendarPlus className="h-4 w-4" aria-hidden="true" />
-              Solicitar atención
+              <MessageCircle className="h-4 w-4" aria-hidden="true" />
+              WhatsApp
             </a>
             <Link
               to="/login"

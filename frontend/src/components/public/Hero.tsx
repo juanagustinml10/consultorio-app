@@ -1,5 +1,5 @@
-import { CalendarCheck, Clock3, MapPin, Phone, Stethoscope } from 'lucide-react'
-import { consultorio, contacto, perfilMedico } from '@/data/sitio'
+import { Clock3, MapPin, MessageCircle, Stethoscope } from 'lucide-react'
+import { consultorio, contacto, horariosAtencion, perfilMedico } from '@/data/sitio'
 
 /** Botón flotante de WhatsApp del consultorio. */
 export function FloatingWhatsApp() {
@@ -77,7 +77,7 @@ export function Hero() {
           </p>
 
           <p className="mt-4 text-sm leading-relaxed text-primary-100/85 sm:mt-5 sm:text-lg">
-            {perfilMedico.descripcion}
+            Atención médica personalizada y seguimiento cercano de cada paciente. La inscripción es por orden de llegada: te registrás al llegar y esperás tu lugar.
           </p>
 
           {/* Recuadro: horario y ubicación */}
@@ -87,9 +87,9 @@ export function Hero() {
                 <Clock3 className="h-4.5 w-4.5 text-accent-300" aria-hidden="true" />
               </span>
               <span className="min-w-0 flex-1 text-sm text-primary-100/90 sm:text-base">
-                <strong className="font-semibold text-white">Lunes a Viernes</strong>
+                <strong className="font-semibold text-white">{horariosAtencion[0]?.dias}</strong>
                 <span className="mx-1.5 text-white/40">·</span>
-                <span className="numeros-tabulares">desde las 17 hs</span>
+                <span className="numeros-tabulares">{horariosAtencion[0]?.franja}</span>
               </span>
             </div>
             <div className="h-px bg-white/10" aria-hidden="true" />
@@ -113,20 +113,21 @@ export function Hero() {
           </div>
 
           {/* Acciones: a ancho completo en móvil, cómodas al pulgar */}
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
             <a
-              href="#contacto"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold text-primary-950 shadow-lg shadow-accent-500/10 transition hover:-translate-y-0.5 hover:bg-accent-100 sm:w-auto"
+              href={contacto.whatsappUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition hover:-translate-y-0.5 hover:bg-emerald-600 sm:w-auto"
             >
-              <CalendarCheck className="h-4.5 w-4.5" aria-hidden="true" />
-              Solicitar atención
+              <MessageCircle className="h-4.5 w-4.5" aria-hidden="true" />
+              WhatsApp
             </a>
             <a
-              href={contacto.telUrl}
+              href="#horarios"
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-6 py-3.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-white/10 sm:w-auto"
             >
-              <Phone className="h-4.5 w-4.5" aria-hidden="true" />
-              <span className="numeros-tabulares">{contacto.telefonoVisible}</span>
+              Cómo funciona la atención
             </a>
           </div>
         </div>

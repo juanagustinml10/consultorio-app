@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { CalendarCheck, ChevronDown, HeartPulse, Lock, MessagesSquare } from 'lucide-react'
-import { consultorio, contacto, horariosAtencion, perfilMedico, preguntasFrecuentes } from '@/data/sitio'
+import { contacto, perfilMedico, preguntasFrecuentes } from '@/data/sitio'
 import { SeccionPublica } from './SeccionPublica'
 
 function FAQItem({ pregunta, respuesta }: { pregunta: string; respuesta: string }) {
@@ -106,9 +106,6 @@ export function SiteFooter() {
               <span className="font-bold">{perfilMedico.nombre}</span>
             </div>
             <p className="mt-3 text-sm text-white/60">Consultorio médico</p>
-            <p className="mt-1 text-xs text-white/40">
-              {horariosAtencion[0]?.dias}, {horariosAtencion[0]?.franja}
-            </p>
           </div>
           <div>
             <h3 className="text-sm font-semibold text-white/80">Contacto</h3>
@@ -128,7 +125,6 @@ export function SiteFooter() {
                   WhatsApp
                 </a>
               </li>
-              <li>{consultorio.direccionCompleta}</li>
             </ul>
           </div>
           <div>

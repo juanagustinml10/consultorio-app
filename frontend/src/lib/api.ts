@@ -298,11 +298,10 @@ export interface ConsultaVersionApi {
   datos: {
     fecha?: string
     motivoConsulta?: string | null
-    sintomas?: string | null
-    evaluacion?: string | null
     diagnostico?: string | null
     tratamiento?: string | null
     indicaciones?: string | null
+    derivaciones?: string | null
     proximoControl?: string | null
     version?: number
     registradoPor?: string | null
@@ -323,11 +322,10 @@ export interface ConsultaApi {
   turnoId?: string | null
   fecha: string
   motivoConsulta?: string | null
-  sintomas?: string | null
-  evaluacion?: string | null
   diagnostico?: string | null
   tratamiento?: string | null
   indicaciones?: string | null
+  derivaciones?: string | null
   proximoControl?: string | null
   version: number
   esCorreccion: boolean
@@ -352,11 +350,10 @@ export interface HistoriaClinicaApi {
 export interface PayloadConsulta {
   fecha?: string
   motivoConsulta?: string | null
-  sintomas?: string | null
-  evaluacion?: string | null
   diagnostico?: string | null
   tratamiento?: string | null
   indicaciones?: string | null
+  derivaciones?: string | null
   proximoControl?: string | null
   esCorreccion?: boolean
 }

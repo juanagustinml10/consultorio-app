@@ -105,10 +105,9 @@ export default function HistoriaClinicaPage() {
       fecha: string
       motivoConsulta: string
       diagnostico: string
-      evaluacion: string
-      sintomas: string
       tratamiento: string
       indicaciones: string
+      derivaciones: string
       proximoControl: string
     }
   }>({
@@ -118,10 +117,9 @@ export default function HistoriaClinicaPage() {
       fecha: ahoraIsoLocal(),
       motivoConsulta: '',
       diagnostico: '',
-      evaluacion: '',
-      sintomas: '',
       tratamiento: '',
       indicaciones: '',
+      derivaciones: '',
       proximoControl: '',
     },
   })
@@ -250,10 +248,9 @@ export default function HistoriaClinicaPage() {
         fecha: ahoraIsoLocal(),
         motivoConsulta: '',
         diagnostico: '',
-        evaluacion: '',
-        sintomas: '',
         tratamiento: '',
         indicaciones: '',
+        derivaciones: '',
         proximoControl: '',
       },
     })
@@ -271,10 +268,9 @@ export default function HistoriaClinicaPage() {
         fecha: aDatetimeLocal(c.fecha),
         motivoConsulta: c.motivoConsulta ?? '',
         diagnostico: c.diagnostico ?? '',
-        evaluacion: c.evaluacion ?? '',
-        sintomas: c.sintomas ?? '',
         tratamiento: c.tratamiento ?? '',
         indicaciones: c.indicaciones ?? '',
+        derivaciones: c.derivaciones ?? '',
         proximoControl: c.proximoControl ? c.proximoControl.slice(0, 10) : '',
       },
     })
@@ -294,10 +290,9 @@ export default function HistoriaClinicaPage() {
       fecha: modalConsulta.valores.fecha ? modalConsulta.valores.fecha : undefined,
       motivoConsulta: modalConsulta.valores.motivoConsulta.trim() || null,
       diagnostico: modalConsulta.valores.diagnostico.trim() || null,
-      evaluacion: modalConsulta.valores.evaluacion.trim() || null,
-      sintomas: modalConsulta.valores.sintomas.trim() || null,
       tratamiento: modalConsulta.valores.tratamiento.trim() || null,
       indicaciones: modalConsulta.valores.indicaciones.trim() || null,
+      derivaciones: modalConsulta.valores.derivaciones.trim() || null,
       proximoControl: modalConsulta.valores.proximoControl
         ? `${modalConsulta.valores.proximoControl}T00:00:00`
         : null,
@@ -374,11 +369,12 @@ export default function HistoriaClinicaPage() {
     const campos = modalConsulta.valores
     const hayCambiosSinGuardar = modalConsulta.abierto && (
       modalConsulta.modo === 'crear'
-        ? Boolean(campos.motivoConsulta || campos.diagnostico || campos.evaluacion || campos.sintomas || campos.tratamiento || campos.indicaciones || campos.proximoControl)
+        ? Boolean(campos.motivoConsulta || campos.diagnostico || campos.tratamiento || campos.indicaciones || campos.derivaciones || campos.proximoControl)
         : Boolean(idConsultaAtencion && consultas.find((c) => c.id === idConsultaAtencion && (
             campos.motivoConsulta !== (c.motivoConsulta ?? '') || campos.diagnostico !== (c.diagnostico ?? '') ||
-            campos.evaluacion !== (c.evaluacion ?? '') || campos.sintomas !== (c.sintomas ?? '') ||
-            campos.tratamiento !== (c.tratamiento ?? '') || campos.indicaciones !== (c.indicaciones ?? '')
+            campos.tratamiento !== (c.tratamiento ?? '') || campos.indicaciones !== (c.indicaciones ?? '') ||
+            campos.derivaciones !== (c.derivaciones ?? '') ||
+            campos.proximoControl !== (c.proximoControl ? c.proximoControl.slice(0, 10) : '')
           )))
     )
     if (hayCambiosSinGuardar && !window.confirm('Hay cambios de consulta sin guardar. Si finalizás ahora, se descartarán. ¿Continuar?')) return
@@ -450,12 +446,12 @@ export default function HistoriaClinicaPage() {
                   <div className="min-w-0">
                     <p className="text-xs font-bold uppercase tracking-wide text-primary-700">Atención actual</p>
                     {cargandoAtencion ? (
-                      <p className="mt-1 text-sm text-slate-600">Cargando inscripción…</p>
+                      <p className="mt-1 text-sm text-slate-600">Cargando inscripción⬦</p>
                     ) : errorAtencion ? (
                       <p role="alert" className="mt-1 text-sm text-rose-700">{errorAtencion}</p>
                     ) : turnoAtencion ? (
                       <p className="mt-1 text-sm font-semibold text-primary-950">
-                        N.º {turnoAtencion.numeroOrdenDia ?? '—'} · EN ATENCIÓN · Historia clínica y consulta en esta pantalla
+                        N.º {turnoAtencion.numeroOrdenDia ?? '�'} · EN ATENCI�N · Historia clínica y consulta en esta pantalla
                       </p>
                     ) : null}
                   </div>
@@ -531,7 +527,7 @@ export default function HistoriaClinicaPage() {
               </div>
             </Card>
 
-            {/* SECCIÓN 1: Antecedentes, Alergias y Datos Clínicos */}
+            {/* SECCI�N 1: Antecedentes, Alergias y Datos Clínicos */}
             <Card className="p-5 sm:p-6">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-primary-100/70 pb-3">
                 <div className="flex items-center gap-2">
@@ -588,7 +584,7 @@ export default function HistoriaClinicaPage() {
                       <input
                         id="alergias"
                         type="text"
-                        placeholder="Ej: Penicilina, AINEs, látex, mariscos…"
+                        placeholder="Ej: Penicilina, AINEs, látex, mariscos⬦"
                         value={formAntecedentes.alergias ?? ''}
                         onChange={(e) =>
                           setFormAntecedentes((prev) => ({ ...prev, alergias: e.target.value }))
@@ -607,7 +603,7 @@ export default function HistoriaClinicaPage() {
                       <textarea
                         id="antecedentesPersonales"
                         rows={3}
-                        placeholder="Patologías previas, cirugías, internaciones, hábitos…"
+                        placeholder="Patologías previas, cirugías, internaciones, hábitos⬦"
                         value={formAntecedentes.antecedentesPersonales ?? ''}
                         onChange={(e) =>
                           setFormAntecedentes((prev) => ({
@@ -629,7 +625,7 @@ export default function HistoriaClinicaPage() {
                       <textarea
                         id="antecedentesFamiliares"
                         rows={3}
-                        placeholder="Cardiopatías, diabetes, oncología, HTA en familiares de 1er grado…"
+                        placeholder="Cardiopatías, diabetes, oncología, HTA en familiares de 1er grado⬦"
                         value={formAntecedentes.antecedentesFamiliares ?? ''}
                         onChange={(e) =>
                           setFormAntecedentes((prev) => ({
@@ -651,7 +647,7 @@ export default function HistoriaClinicaPage() {
                       <textarea
                         id="medicacionHabitual"
                         rows={3}
-                        placeholder="Fármacos que consume regularmente con dosis y posología…"
+                        placeholder="Fármacos que consume regularmente con dosis y posología⬦"
                         value={formAntecedentes.medicacionHabitual ?? ''}
                         onChange={(e) =>
                           setFormAntecedentes((prev) => ({
@@ -673,7 +669,7 @@ export default function HistoriaClinicaPage() {
                       <textarea
                         id="observacionesClinicas"
                         rows={3}
-                        placeholder="Otras notas clínicas o advertencias relevantes…"
+                        placeholder="Otras notas clínicas o advertencias relevantes⬦"
                         value={formAntecedentes.observaciones ?? ''}
                         onChange={(e) =>
                           setFormAntecedentes((prev) => ({
@@ -813,7 +809,7 @@ export default function HistoriaClinicaPage() {
                     Todavía no hay consultas registradas para este paciente
                   </p>
                   <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-                    Iniciá el historial haciendo clic en el botón “Registrar consulta”.
+                    Iniciá el historial haciendo clic en el botón "Registrar consulta".
                   </p>
                   {!turnoId && (
                     <button
@@ -896,11 +892,11 @@ export default function HistoriaClinicaPage() {
                             </div>
                           )}
 
-                          {/* Diagnóstico */}
+                          {/* Diagn�stico prescriptivo */}
                           {c.diagnostico && (
                             <div className="rounded-xl border border-primary-200/80 bg-primary-50/60 p-3.5">
                               <span className="block text-xs font-bold uppercase tracking-wider text-primary-900">
-                                Diagnóstico
+                                Diagn�stico prescriptivo
                               </span>
                               <p className="mt-1 text-sm font-semibold text-primary-950 whitespace-pre-line">
                                 {c.diagnostico}
@@ -908,39 +904,13 @@ export default function HistoriaClinicaPage() {
                             </div>
                           )}
 
-                          {/* Evolución y Síntomas */}
-                          {(c.evaluacion || c.sintomas) && (
-                            <div className="grid gap-3 sm:grid-cols-2">
-                              {c.evaluacion && (
-                                <div>
-                                  <span className="block text-xs font-bold uppercase tracking-wider text-primary-800">
-                                    Evolución clínica
-                                  </span>
-                                  <p className="mt-1 text-sm text-primary-900 whitespace-pre-line">
-                                    {c.evaluacion}
-                                  </p>
-                                </div>
-                              )}
-                              {c.sintomas && (
-                                <div>
-                                  <span className="block text-xs font-bold uppercase tracking-wider text-primary-800">
-                                    Síntomas referidos
-                                  </span>
-                                  <p className="mt-1 text-sm text-primary-900 whitespace-pre-line">
-                                    {c.sintomas}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Tratamiento e Indicaciones */}
-                          {(c.tratamiento || c.indicaciones) && (
+                          {/* Tratamiento, Indicaciones y Derivaciones */}
+                          {(c.tratamiento || c.indicaciones || c.derivaciones) && (
                             <div className="grid gap-3 sm:grid-cols-2">
                               {c.tratamiento && (
                                 <div>
                                   <span className="block text-xs font-bold uppercase tracking-wider text-primary-800">
-                                    Tratamiento indicado
+                                    Tratamiento
                                   </span>
                                   <p className="mt-1 text-sm text-primary-900 whitespace-pre-line">
                                     {c.tratamiento}
@@ -950,21 +920,31 @@ export default function HistoriaClinicaPage() {
                               {c.indicaciones && (
                                 <div>
                                   <span className="block text-xs font-bold uppercase tracking-wider text-primary-800">
-                                    Indicaciones / Observaciones
+                                    Indicaciones
                                   </span>
                                   <p className="mt-1 text-sm text-primary-900 whitespace-pre-line">
                                     {c.indicaciones}
                                   </p>
                                 </div>
                               )}
+                              {c.derivaciones && (
+                                <div className="sm:col-span-2">
+                                  <span className="block text-xs font-bold uppercase tracking-wider text-primary-800">
+                                    Derivaciones
+                                  </span>
+                                  <p className="mt-1 text-sm text-primary-900 whitespace-pre-line">
+                                    {c.derivaciones}
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           )}
 
-                          {/* Próximo control */}
+                          {/* Pr�ximo control */}
                           {c.proximoControl && (
                             <div className="flex items-center gap-2 pt-1 text-xs text-slate-500">
                               <Clock className="h-3.5 w-3.5 text-primary-600" />
-                              <span>Próximo control sugerido:</span>
+                              <span>Pr�ximo control sugerido:</span>
                               <strong className="text-primary-900">{fechaSolo(c.proximoControl)}</strong>
                             </div>
                           )}
@@ -1016,7 +996,7 @@ export default function HistoriaClinicaPage() {
                                       ) : null}
                                       {v.datos.diagnostico ? (
                                         <div>
-                                          <dt className="font-semibold text-slate-500">Diagnóstico</dt>
+                                          <dt className="font-semibold text-slate-500">Diagn�stico prescriptivo</dt>
                                           <dd className="text-primary-950 font-medium">
                                             {String(v.datos.diagnostico)}
                                           </dd>
@@ -1030,14 +1010,6 @@ export default function HistoriaClinicaPage() {
                                           </dd>
                                         </div>
                                       ) : null}
-                                      {v.datos.evaluacion ? (
-                                        <div>
-                                          <dt className="font-semibold text-slate-500">Evolución</dt>
-                                          <dd className="text-primary-950">
-                                            {String(v.datos.evaluacion)}
-                                          </dd>
-                                        </div>
-                                      ) : null}
                                       {v.datos.indicaciones ? (
                                         <div>
                                           <dt className="font-semibold text-slate-500">Indicaciones</dt>
@@ -1046,11 +1018,11 @@ export default function HistoriaClinicaPage() {
                                           </dd>
                                         </div>
                                       ) : null}
-                                      {v.datos.sintomas ? (
+                                      {v.datos.derivaciones ? (
                                         <div>
-                                          <dt className="font-semibold text-slate-500">Síntomas</dt>
+                                          <dt className="font-semibold text-slate-500">Derivaciones</dt>
                                           <dd className="text-primary-950">
-                                            {String(v.datos.sintomas)}
+                                            {String(v.datos.derivaciones)}
                                           </dd>
                                         </div>
                                       ) : null}
@@ -1070,7 +1042,7 @@ export default function HistoriaClinicaPage() {
                                           {v.datos.cambios.map((cambio) => (
                                             <li key={cambio.campo}>
                                               <span className="font-semibold">{cambio.etiqueta}:</span>{' '}
-                                              {cambio.anterior ?? 'Sin dato'} → {cambio.nuevo ?? 'Sin dato'}
+                                              {cambio.anterior ?? 'Sin dato'} �  {cambio.nuevo ?? 'Sin dato'}
                                             </li>
                                           ))}
                                         </ul>
@@ -1170,7 +1142,7 @@ export default function HistoriaClinicaPage() {
                     <input
                       id="consultaMotivo"
                       type="text"
-                      placeholder="Ej: Control de rutina, Fiebre y odinofagia…"
+                      placeholder="Ej.: Control de rutina, fiebre y odinofagia"
                       value={modalConsulta.valores.motivoConsulta}
                       onChange={(e) =>
                         setModalConsulta((m) => ({
@@ -1188,12 +1160,12 @@ export default function HistoriaClinicaPage() {
                     htmlFor="consultaDiagnostico"
                     className="text-xs font-bold uppercase tracking-wide text-primary-800"
                   >
-                    Diagnóstico
+                    Diagn�stico prescriptivo
                   </label>
                   <input
                     id="consultaDiagnostico"
                     type="text"
-                    placeholder="Ej: Faringitis aguda bacteriana, Hipertensión controlada…"
+                    placeholder="Ej.: Faringitis aguda bacteriana, hipertensi�n controlada"
                     value={modalConsulta.valores.diagnostico}
                     onChange={(e) =>
                       setModalConsulta((m) => ({
@@ -1208,61 +1180,15 @@ export default function HistoriaClinicaPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
                     <label
-                      htmlFor="consultaEvaluacion"
-                      className="text-xs font-bold uppercase tracking-wide text-primary-800"
-                    >
-                      Evolución clínica
-                    </label>
-                    <textarea
-                      id="consultaEvaluacion"
-                      rows={3}
-                      placeholder="Hallazgos del examen físico, evolución del cuadro…"
-                      value={modalConsulta.valores.evaluacion}
-                      onChange={(e) =>
-                        setModalConsulta((m) => ({
-                          ...m,
-                          valores: { ...m.valores, evaluacion: e.target.value },
-                        }))
-                      }
-                      className={CLASE_INPUT}
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="consultaSintomas"
-                      className="text-xs font-bold uppercase tracking-wide text-primary-800"
-                    >
-                      Síntomas referidos
-                    </label>
-                    <textarea
-                      id="consultaSintomas"
-                      rows={3}
-                      placeholder="Signos, molestias y cronología relatados por el paciente…"
-                      value={modalConsulta.valores.sintomas}
-                      onChange={(e) =>
-                        setModalConsulta((m) => ({
-                          ...m,
-                          valores: { ...m.valores, sintomas: e.target.value },
-                        }))
-                      }
-                      className={CLASE_INPUT}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label
                       htmlFor="consultaTratamiento"
                       className="text-xs font-bold uppercase tracking-wide text-primary-800"
                     >
-                      Tratamiento indicado
+                      Tratamiento
                     </label>
                     <textarea
                       id="consultaTratamiento"
                       rows={3}
-                      placeholder="Medicamentos, dosis, pautas farmacológicas…"
+                      placeholder="Ej.: Medicamentos, dosis y pautas farmacol�gicas"
                       value={modalConsulta.valores.tratamiento}
                       onChange={(e) =>
                         setModalConsulta((m) => ({
@@ -1279,12 +1205,12 @@ export default function HistoriaClinicaPage() {
                       htmlFor="consultaIndicaciones"
                       className="text-xs font-bold uppercase tracking-wide text-primary-800"
                     >
-                      Indicaciones / Observaciones
+                      Indicaciones
                     </label>
                     <textarea
                       id="consultaIndicaciones"
                       rows={3}
-                      placeholder="Pautas de alarma, reposo, estudios solicitados…"
+                      placeholder="Ej.: Reposo, pautas de alarma y estudios solicitados"
                       value={modalConsulta.valores.indicaciones}
                       onChange={(e) =>
                         setModalConsulta((m) => ({
@@ -1299,10 +1225,32 @@ export default function HistoriaClinicaPage() {
 
                 <div>
                   <label
+                    htmlFor="consultaDerivaciones"
+                    className="text-xs font-bold uppercase tracking-wide text-primary-800"
+                  >
+                    Derivaciones
+                  </label>
+                  <textarea
+                    id="consultaDerivaciones"
+                    rows={3}
+                    placeholder="Ej.: Derivaci�n a especialista, estudios o interconsultas"
+                    value={modalConsulta.valores.derivaciones}
+                    onChange={(e) =>
+                      setModalConsulta((m) => ({
+                        ...m,
+                        valores: { ...m.valores, derivaciones: e.target.value },
+                      }))
+                    }
+                    className={CLASE_INPUT}
+                  />
+                </div>
+
+                <div>
+                  <label
                     htmlFor="consultaProximoControl"
                     className="text-xs font-bold uppercase tracking-wide text-primary-800"
                   >
-                    Próximo control sugerido (opcional)
+                    Pr�ximo control sugerido (opcional)
                   </label>
                   <input
                     id="consultaProximoControl"

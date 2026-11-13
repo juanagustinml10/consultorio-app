@@ -82,11 +82,10 @@ export const crearConsultaSchema = z.object({
   turnoId: z.string().min(1).optional(),
   fecha: fechaIsoSchema.optional(), // si falta, se usa "ahora"
   motivoConsulta: z.string().max(1000).optional().nullable(),
-  sintomas: textoClinico,
-  evaluacion: textoClinico,
   diagnostico: textoClinico,
   tratamiento: textoClinico,
   indicaciones: textoClinico,
+  derivaciones: textoClinico,
   proximoControl: fechaIsoSchema.optional().nullable(),
 })
 
@@ -94,11 +93,10 @@ export const editarConsultaSchema = z
   .object({
     fecha: fechaIsoSchema.optional(),
     motivoConsulta: z.string().max(1000).optional().nullable(),
-    sintomas: textoClinico,
-    evaluacion: textoClinico,
     diagnostico: textoClinico,
     tratamiento: textoClinico,
     indicaciones: textoClinico,
+    derivaciones: textoClinico,
     proximoControl: fechaIsoSchema.optional().nullable(),
     esCorreccion: z.boolean().optional(),
   })
