@@ -3,10 +3,7 @@
  * Usa cookies HttpOnly para la sesión (credentials: 'include').
  */
 
-const apiBaseConfigurada = import.meta.env.VITE_API_BASE_URL?.trim()
-export const API_BASE = apiBaseConfigurada
-  ? `${apiBaseConfigurada.replace(/\/$/, '')}/api/v1`
-  : '/api/v1'
+export const API_BASE = '/api/v1'
 
 export class ApiError extends Error {
   readonly status: number
