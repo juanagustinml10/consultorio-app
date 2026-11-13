@@ -40,7 +40,7 @@ export const preguntasFrecuentes = [
   {
     pregunta: '¿Cómo solicito una atención?',
     respuesta:
-      'Presentate en el consultorio de lunes a jueves a partir de las 17:00 hs e inscribite al llegar. La atención se da por orden de inscripción del día.',
+      'Presentate en el consultorio de lunes a viernes a partir de las 17:00 hs e inscribite al llegar. La atención se da por orden de inscripción del día.',
   },
   {
     pregunta: '¿Cómo funciona la inscripción diaria?',
@@ -49,7 +49,7 @@ export const preguntasFrecuentes = [
   },
   {
     pregunta: '¿Cuándo atiende el consultorio?',
-    respuesta: 'Lunes a jueves, a partir de las 17:00 hs.',
+    respuesta: 'Lunes a viernes, a partir de las 17:00 hs.',
   },
   {
     pregunta: '¿Puedo cancelar mi inscripción del día?',

@@ -81,7 +81,7 @@ export function SiteFooter() {
           <div className="relative">
             <h2 className="text-xl font-bold tracking-tight sm:text-2xl">¿Necesitás comunicarte?</h2>
             <p className="mt-1.5 max-w-md text-sm text-accent-100/80">
-              Escribinos por WhatsApp o inscribite en el consultorio cada tarde de lunes a jueves.
+              Escribinos por WhatsApp o inscribite en el consultorio cada tarde de lunes a viernes.
             </p>
           </div>
           <a
@@ -153,9 +153,10 @@ export function SiteFooter() {
         </div>
         <div className="mt-12 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/40 sm:flex-row sm:items-center sm:justify-between">
           <p>© {ANIO} Consultorio {perfilMedico.nombre}. Todos los derechos reservados.</p>
+          <p className="text-white/30">Designed by Agustin Molina</p>
           <p className="inline-flex items-center gap-1.5">
             <CalendarCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            Atención de lunes a jueves desde las 17:00 hs.
+            Atención de lunes a viernes desde las 17:00 hs.
           </p>
         </div>
       </div>
