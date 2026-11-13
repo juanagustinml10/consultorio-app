@@ -199,6 +199,7 @@ model ConsultaClinica {
   diagnostico     String?
   tratamiento     String?
   indicaciones    String?
+  derivaciones    String?
   proximoControl  DateTime?
   registradoPorId String
   version         Int       @default(1)

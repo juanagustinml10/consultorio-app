@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Activity,
-  BarChart3,
   CheckCircle2,
-  ClipboardList,
   Clock3,
   Loader2,
   RefreshCw,
   Search,
-  Stethoscope,
   Users,
 } from 'lucide-react'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
@@ -261,46 +258,6 @@ export default function MedicoPanel() {
           />
         </section>
 
-        <section aria-label="Accesos rápidos" className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <button
-            type="button"
-            onClick={() => setSeccion('espera')}
-            className="rounded-xl border border-primary-100 bg-white p-3 text-left text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <Users className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Sala de espera
-            <span className="block text-[11px] font-normal text-slate-500">{enEspera.length} {enEspera.length === 1 ? 'paciente' : 'pacientes'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setSeccion('atencion')}
-            className="rounded-xl border border-primary-100 bg-white p-3 text-left text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <Stethoscope className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Consulta actual
-            <span className="block text-[11px] font-normal text-slate-500">
-              {enAtencion.length > 0 ? `${enAtencion.length} en curso` : 'sin paciente'}
-            </span>
-          </button>
-          <Link to="/medico/pacientes" className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50">
-            <Search className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Buscar pacientes
-          </Link>
-          <Link
-            to="/medico/historias"
-            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <ClipboardList className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Historias clínicas
-          </Link>
-          <Link
-            to="/medico/estadisticas"
-            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <BarChart3 className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Estadísticas e informes
-          </Link>
-        </section>
 
         <Card className="overflow-hidden">
           <div className="border-b border-primary-100 p-3 sm:p-4">

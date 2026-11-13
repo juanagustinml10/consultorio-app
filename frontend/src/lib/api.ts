@@ -1,16 +1,9 @@
 /**
  * Cliente HTTP para la API del backend.
- *
- * Las solicitudes van al mismo origen (Cloudflare Pages) y el proxy de
- * Pages Functions (frontend/functions/api/[[path]].ts) las reenvía al
- * backend de Vercel. Usa cookies HttpOnly para la sesión
- * (credentials: 'include').
+ * Usa cookies HttpOnly para la sesión (credentials: 'include').
  */
 
-const apiBaseConfigurada = import.meta.env.VITE_API_BASE_URL?.trim()
-export const API_BASE = apiBaseConfigurada
-  ? `${apiBaseConfigurada.replace(/\/$/, '')}/api/v1`
-  : 'https://consultorio-backend-eosin.vercel.app/api/v1'
+export const API_BASE = '/api/v1'
 
 export class ApiError extends Error {
   readonly status: number
@@ -305,11 +298,10 @@ export interface ConsultaVersionApi {
   datos: {
     fecha?: string
     motivoConsulta?: string | null
-    sintomas?: string | null
-    evaluacion?: string | null
     diagnostico?: string | null
     tratamiento?: string | null
     indicaciones?: string | null
+    derivaciones?: string | null
     proximoControl?: string | null
     version?: number
     registradoPor?: string | null
@@ -330,11 +322,10 @@ export interface ConsultaApi {
   turnoId?: string | null
   fecha: string
   motivoConsulta?: string | null
-  sintomas?: string | null
-  evaluacion?: string | null
   diagnostico?: string | null
   tratamiento?: string | null
   indicaciones?: string | null
+  derivaciones?: string | null
   proximoControl?: string | null
   version: number
   esCorreccion: boolean
@@ -359,11 +350,10 @@ export interface HistoriaClinicaApi {
 export interface PayloadConsulta {
   fecha?: string
   motivoConsulta?: string | null
-  sintomas?: string | null
-  evaluacion?: string | null
   diagnostico?: string | null
   tratamiento?: string | null
   indicaciones?: string | null
+  derivaciones?: string | null
   proximoControl?: string | null
   esCorreccion?: boolean
 }

@@ -10,17 +10,17 @@ export const perfilMedico = {
   nombre: 'Dr. Gustavo Puertas',
   matricula: '3503',
   descripcion:
-    'Atención médica personalizada y seguimiento cercano de cada paciente. La inscripción es por orden de llegada: te registrás al llegar y esperás tu lugar.',
+    'Consultorio de atención médica privada, orientado al cuidado integral de la salud, con atención personalizada, compromiso profesional y seguimiento cercano de cada paciente. La atención se realiza mediante inscripción diaria, brindando un servicio organizado, accesible y de confianza.',
 }
 
 export const consultorio = {
   ciudad: 'Aguilares, Tucumán, Argentina',
-  direccion: 'Laprida 787',
-  direccionCompleta: 'Laprida 787, Aguilares, Tucumán, Argentina',
+  direccion: 'Pellegrini 824',
+  direccionCompleta: 'Pellegrini 824, Aguilares, Tucumán, Argentina',
   mapsUrl:
-    'https://www.google.com/maps/search/?api=1&query=Laprida+787,+Aguilares,+Tucum%C3%A1n,+Argentina',
+    'https://www.google.com/maps/search/?api=1&query=Pellegrini+824,+Aguilares,+Tucum%C3%A1n,+Argentina',
   mapsEmbedUrl:
-    'https://www.google.com/maps?q=Laprida+787,+Aguilares,+Tucum%C3%A1n,+Argentina&output=embed',
+    'https://www.google.com/maps?q=Pellegrini+824,+Aguilares,+Tucum%C3%A1n,+Argentina&output=embed',
 }
 
 export const contacto = {
@@ -32,51 +32,28 @@ export const contacto = {
 export const horariosAtencion = [
   {
     dias: 'Lunes a Viernes',
-    franja: 'desde las 17 hs',
+    franja: 'desde hs 17:00',
   },
-]
-
-/**
- * PROVISORIO: coberturas de ejemplo del sistema (seed del backend).
- * Reemplazar por los nombres reales cuando estén definidos.
- */
-export const obrasSociales = [
-  'OSDE',
-  'Swiss Medical',
-  'Galeno',
-  'Medicus',
-  'Medifé',
-  'Avalian',
-  'Nobis',
-  'Jerárquicos Salud',
-  'PAMI',
-  'Subsidio de Salud',
-  'IOSFA',
-  'ASUNT',
-  'Luis Pasteur',
-  'OSDEPYM',
-  'AMFFA',
-  'Particular',
 ]
 
 export const preguntasFrecuentes = [
   {
     pregunta: '¿Cómo solicito una atención?',
     respuesta:
-      'Podés comunicarte por WhatsApp o teléfono al 3865 481557, o presentarte directamente en el consultorio durante los horarios de atención.',
+      'Presentate en el consultorio de lunes a jueves a partir de las 17:00 hs e inscribite al llegar. La atención se da por orden de inscripción del día.',
+  },
+  {
+    pregunta: '¿Cómo funciona la inscripción diaria?',
+    respuesta:
+      'Cada día de atención se abre una lista de inscripción por orden de llegada al momento de presentarse. Los pacientes son atendidos en ese mismo orden; no se asignan turnos con hora fija.',
   },
   {
     pregunta: '¿Cuándo atiende el consultorio?',
-    respuesta: 'De lunes a viernes desde las 17 hs. Podés pasar a inscribirte en ese horario.',
-  },
-  {
-    pregunta: '¿Cómo funciona la inscripción del día?',
-    respuesta:
-      'La inscripción es por orden de llegada: al registrarte recibís un número que determina el orden de atención de ese día. El número no se reutiliza.',
+    respuesta: 'Lunes a jueves, a partir de las 17:00 hs.',
   },
   {
     pregunta: '¿Puedo cancelar mi inscripción del día?',
     respuesta:
-      'Sí, se pide avisar con anticipación para liberar el lugar. El número asignado no se reutiliza.',
+      'Sí. Si ya no podés venir, avisanos por WhatsApp para liberar tu lugar en la lista del día.',
   },
 ]

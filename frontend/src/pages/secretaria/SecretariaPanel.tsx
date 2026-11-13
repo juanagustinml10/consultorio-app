@@ -5,15 +5,12 @@ import {
   CalendarDays,
   CalendarPlus,
   CheckCircle2,
-  ClipboardList,
   Clock3,
+  Filter,
   Loader2,
   RefreshCw,
   Search,
-  UserPlus,
   Users,
-  BarChart3,
-  Filter,
 } from 'lucide-react'
 import { DashboardLayout } from '@/layouts/DashboardLayout'
 import { StatCard } from '@/components/dashboard/StatCard'
@@ -184,44 +181,6 @@ export default function SecretariaPanel() {
           </p>
         )}
 
-        <section aria-label="Accesos rápidos" className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-          <Link
-            to="/secretaria/pacientes/nuevo"
-            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <UserPlus className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Registrar paciente nuevo
-          </Link>
-          <Link
-            to="/secretaria/pacientes"
-            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <Search className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Buscar pacientes
-          </Link>
-          <Link
-            to="/secretaria/historias"
-            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <ClipboardList className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Historias clínicas
-          </Link>
-          <Link
-            to="/secretaria/estadisticas"
-            className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50"
-          >
-            <BarChart3 className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Estadísticas e informes
-          </Link>
-          <a href="#pacientes-del-dia" className="rounded-xl border border-primary-100 bg-white p-3 text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50">
-            <Users className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Pacientes del día
-          </a>
-          <button type="button" onClick={() => { setVerCancelados(true); setFiltroJornada('TODOS') }} className="rounded-xl border border-primary-100 bg-white p-3 text-left text-xs font-semibold text-primary-800 shadow-card transition hover:bg-primary-50">
-            <Filter className="mb-2 h-4 w-4 text-primary-600" aria-hidden="true" />
-            Inscripciones canceladas
-          </button>
-        </section>
 
         <Card className="flex flex-wrap items-end gap-3 p-4">
           <label htmlFor="fechaRecepcion" className="text-sm font-semibold text-primary-900">

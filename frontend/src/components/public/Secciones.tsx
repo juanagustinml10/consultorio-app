@@ -7,24 +7,16 @@ export function SeccionObrasSociales() {
     <SeccionPublica
       id="obras-sociales"
       titulo="Obras sociales y prepagas"
-      subtitulo="Coberturas aceptadas en el consultorio."
+      subtitulo="Obras sociales aceptadas en el consultorio."
     >
-      {/* Recuadro destacado: todas las obras sociales */}
-      <div className="relative rounded-3xl border border-accent-200 bg-accent-50 p-8 sm:p-10 shadow-sm overflow-hidden">
-        {/* Banda decorativa superior */}
-        <div className="absolute -top-1 left-1/2 -translate-x-1/2 h-1 w-full sm:h-2 sm:w-full bg-accent-500 rounded-full sm:rounded-none sm:h-full sm:w-2" />
-
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6 sm:items-start">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-100 text-accent-600 sm:h-16 sm:w-16">
-            <CreditCard className="h-7 w-7 sm:h-8 sm:w-8" aria-hidden="true" />
-          </div>
-          <div className="text-center sm:text-left">
-            <h3 className="text-xl font-bold text-primary-900 sm:text-2xl">Se reciben todas las obras sociales</h3>
-            <p className="mt-1 text-sm text-primary-600/70 sm:mt-2 sm:text-base">
-              Aceptamos las principales obras sociales y prepagas del país. Consultanos por tu cobertura.
-            </p>
-          </div>
+      {/* Recuadro: todas las obras sociales */}
+      <div className="mt-6 flex w-full items-center justify-center rounded-xl border border-accent-200/50 bg-accent-50/10 p-4 sm:mt-8 sm:p-5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-600">
+          <CreditCard className="h-4 w-4" aria-hidden="true" />
         </div>
+        <span className="ml-3 text-base font-semibold text-primary-900 sm:ml-4 sm:text-lg">
+          Se reciben todas las obras sociales
+        </span>
       </div>
     </SeccionPublica>
   )
@@ -111,7 +103,7 @@ export function SeccionContacto() {
       subtitulo="Canales disponibles para comunicarse con el consultorio."
       alternada
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <a
           href={contacto.whatsappUrl}
           target="_blank"
@@ -135,19 +127,6 @@ export function SeccionContacto() {
           <p className="mt-4 text-sm font-medium text-slate-500">Teléfono</p>
           <p className="numeros-tabulares mt-1 text-lg font-bold text-primary-900">{contacto.telefonoVisible}</p>
           <p className="mt-1 text-xs text-slate-400">durante horarios de atención</p>
-        </a>
-        <a
-          href={consultorio.mapsUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="group rounded-2xl border border-primary-100 bg-white p-6 shadow-card transition hover:-translate-y-0.5 hover:bg-primary-800 hover:shadow-card-hover"
-        >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-100 text-primary-700">
-            <MapPin className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <p className="mt-4 text-sm font-medium text-slate-500">Dirección</p>
-          <p className="mt-1 text-base font-bold text-primary-900">{consultorio.direccion}</p>
-          <p className="mt-1 text-xs text-slate-400">{consultorio.ciudad}</p>
         </a>
       </div>
     </SeccionPublica>
