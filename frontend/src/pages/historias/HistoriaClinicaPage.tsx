@@ -1245,26 +1245,6 @@ export default function HistoriaClinicaPage() {
                   />
                 </div>
 
-                <div>
-                  <label
-                    htmlFor="consultaProximoControl"
-                    className="text-xs font-bold uppercase tracking-wide text-primary-800"
-                  >
-                    Próximo control sugerido (opcional)
-                  </label>
-                  <input
-                    id="consultaProximoControl"
-                    type="date"
-                    value={modalConsulta.valores.proximoControl}
-                    onChange={(e) =>
-                      setModalConsulta((m) => ({
-                        ...m,
-                        valores: { ...m.valores, proximoControl: e.target.value },
-                      }))
-                    }
-                    className={`${CLASE_INPUT} max-w-xs`}
-                  />
-                </div>
 
                 <div className="flex justify-end gap-3 pt-3 border-t border-primary-100">
                   <button
