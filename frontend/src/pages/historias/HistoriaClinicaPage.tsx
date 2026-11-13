@@ -451,7 +451,7 @@ export default function HistoriaClinicaPage() {
                       <p role="alert" className="mt-1 text-sm text-rose-700">{errorAtencion}</p>
                     ) : turnoAtencion ? (
                       <p className="mt-1 text-sm font-semibold text-primary-950">
-                        N.º {turnoAtencion.numeroOrdenDia ?? '�'} · EN ATENCI�N · Historia clínica y consulta en esta pantalla
+                        N.º {turnoAtencion.numeroOrdenDia ?? '—'} · EN ATENCIÓN · Historia clínica y consulta en esta pantalla
                       </p>
                     ) : null}
                   </div>
@@ -527,7 +527,7 @@ export default function HistoriaClinicaPage() {
               </div>
             </Card>
 
-            {/* SECCI�N 1: Antecedentes, Alergias y Datos Clínicos */}
+            {/* SECCIÓN 1: Antecedentes, Alergias y Datos Clínicos */}
             <Card className="p-5 sm:p-6">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-primary-100/70 pb-3">
                 <div className="flex items-center gap-2">
@@ -892,11 +892,11 @@ export default function HistoriaClinicaPage() {
                             </div>
                           )}
 
-                          {/* Diagn�stico prescriptivo */}
+                          {/* Diagnóstico prescriptivo */}
                           {c.diagnostico && (
                             <div className="rounded-xl border border-primary-200/80 bg-primary-50/60 p-3.5">
                               <span className="block text-xs font-bold uppercase tracking-wider text-primary-900">
-                                Diagn�stico prescriptivo
+                                Diagnóstico prescriptivo
                               </span>
                               <p className="mt-1 text-sm font-semibold text-primary-950 whitespace-pre-line">
                                 {c.diagnostico}
@@ -940,11 +940,11 @@ export default function HistoriaClinicaPage() {
                             </div>
                           )}
 
-                          {/* Pr�ximo control */}
+                          {/* Próximo control */}
                           {c.proximoControl && (
                             <div className="flex items-center gap-2 pt-1 text-xs text-slate-500">
                               <Clock className="h-3.5 w-3.5 text-primary-600" />
-                              <span>Pr�ximo control sugerido:</span>
+                              <span>Próximo control sugerido:</span>
                               <strong className="text-primary-900">{fechaSolo(c.proximoControl)}</strong>
                             </div>
                           )}
@@ -996,7 +996,7 @@ export default function HistoriaClinicaPage() {
                                       ) : null}
                                       {v.datos.diagnostico ? (
                                         <div>
-                                          <dt className="font-semibold text-slate-500">Diagn�stico prescriptivo</dt>
+                                          <dt className="font-semibold text-slate-500">Diagnóstico prescriptivo</dt>
                                           <dd className="text-primary-950 font-medium">
                                             {String(v.datos.diagnostico)}
                                           </dd>
@@ -1042,7 +1042,7 @@ export default function HistoriaClinicaPage() {
                                           {v.datos.cambios.map((cambio) => (
                                             <li key={cambio.campo}>
                                               <span className="font-semibold">{cambio.etiqueta}:</span>{' '}
-                                              {cambio.anterior ?? 'Sin dato'} �  {cambio.nuevo ?? 'Sin dato'}
+                                              {cambio.anterior ?? 'Sin dato'} → {cambio.nuevo ?? 'Sin dato'}
                                             </li>
                                           ))}
                                         </ul>
@@ -1160,12 +1160,12 @@ export default function HistoriaClinicaPage() {
                     htmlFor="consultaDiagnostico"
                     className="text-xs font-bold uppercase tracking-wide text-primary-800"
                   >
-                    Diagn�stico prescriptivo
+                    Diagnóstico prescriptivo
                   </label>
                   <input
                     id="consultaDiagnostico"
                     type="text"
-                    placeholder="Ej.: Faringitis aguda bacteriana, hipertensi�n controlada"
+                    placeholder="Ej.: Faringitis aguda bacteriana, hipertensión controlada"
                     value={modalConsulta.valores.diagnostico}
                     onChange={(e) =>
                       setModalConsulta((m) => ({
@@ -1188,7 +1188,7 @@ export default function HistoriaClinicaPage() {
                     <textarea
                       id="consultaTratamiento"
                       rows={3}
-                      placeholder="Ej.: Medicamentos, dosis y pautas farmacol�gicas"
+                      placeholder="Ej.: Medicamentos, dosis y pautas farmacológicas"
                       value={modalConsulta.valores.tratamiento}
                       onChange={(e) =>
                         setModalConsulta((m) => ({
@@ -1233,7 +1233,7 @@ export default function HistoriaClinicaPage() {
                   <textarea
                     id="consultaDerivaciones"
                     rows={3}
-                    placeholder="Ej.: Derivaci�n a especialista, estudios o interconsultas"
+                    placeholder="Ej.: Derivación a especialista, estudios o interconsultas"
                     value={modalConsulta.valores.derivaciones}
                     onChange={(e) =>
                       setModalConsulta((m) => ({
@@ -1250,7 +1250,7 @@ export default function HistoriaClinicaPage() {
                     htmlFor="consultaProximoControl"
                     className="text-xs font-bold uppercase tracking-wide text-primary-800"
                   >
-                    Pr�ximo control sugerido (opcional)
+                    Próximo control sugerido (opcional)
                   </label>
                   <input
                     id="consultaProximoControl"
